@@ -18,6 +18,7 @@ using System;
 public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 {
     [SerializeField] private MeshAreaSettings mapSettings;
+    [SerializeField] private SimpleNoise simpleNoise;
 
     private void Awake()
     {
@@ -29,8 +30,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         MeshAreaRef mesh = new() { Value = GetComponent<MeshFilter>().mesh };
 
         dstManager.AddComponentData(entity, mapSettings);
+        dstManager.AddComponentData(entity, simpleNoise);
         dstManager.AddComponentData(entity, mesh);
         dstManager.AddComponent<UpdateMeshArea>(entity);
+        dstManager.AddComponent<GenerateHeightMap>(entity);
+        dstManager.AddBuffer<HeightMapElement>(entity);
     }
 }
 
