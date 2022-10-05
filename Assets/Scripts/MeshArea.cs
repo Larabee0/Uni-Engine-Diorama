@@ -20,9 +20,50 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private MeshAreaSettings mapSettings;
     [SerializeField] private SimpleNoise simpleNoise;
 
+    [SerializeField] private bool UpdateOnChange;
+    private Mesh activeMesh;
+
     private void Awake()
     {
         GetComponent<MeshFilter>().mesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+    }
+
+    private void OnValidate()
+    {
+        if (UpdateOnChange)
+        {
+            Generate();
+        }
+    }
+
+    public void Generate()
+    {
+        activeMesh = GetComponent<MeshFilter>().sharedMesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+
+        Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+        NativeArray<HeightMapElement> heightMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        var noiseGenerator = new SimpleNoiseHeightMapGenerator
+        {
+            areaSettings = mapSettings,
+            simpleNoise = simpleNoise,
+            HeightMap = heightMap
+        };
+
+        noiseGenerator.Schedule(heightMap.Length, 64).Complete();
+
+        var generator = new MeshGenerator
+        {
+            meshSettings = mapSettings,
+            meshIndex = 0,
+            meshDataArray = meshDataArray,
+            heightMap = heightMap
+        };
+
+        generator.Schedule().Complete();
+        heightMap.Dispose();
+        Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, activeMesh);
+        activeMesh.RecalculateBounds();
+        activeMesh.RecalculateNormals();
     }
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)

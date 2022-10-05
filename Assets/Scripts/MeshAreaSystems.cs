@@ -9,6 +9,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine.Rendering;
 using Unity.Rendering;
+using Unity.Entities.UniversalDelegates;
 
 /// <summary>
 /// In Unity ECS there are two types of component systems,
@@ -152,7 +153,7 @@ public partial class MeshAreaSystem : SystemBase
             // finally if you want to make changes to components or entities not within the query, you need
             // to parse in an entity command buffer.
             heightMapTypeHandle.Update(this);
-            var triangulatorJob = new MeshGenerator
+            var triangulatorJob = new EntityMeshGenerator
             {
                 meshEntityTypeHandle = GetEntityTypeHandle(),
                 meshSettingsTypeHandle = GetComponentTypeHandle<MeshAreaSettings>(true),
@@ -233,7 +234,7 @@ public partial class MeshAreaSystem : SystemBase
     }
 
     [BurstCompile]
-    private struct MeshGenerator : IJobEntityBatchWithIndex
+    private struct EntityMeshGenerator : IJobEntityBatchWithIndex
     {
         [ReadOnly]
         public EntityTypeHandle meshEntityTypeHandle;
@@ -310,5 +311,58 @@ public struct MeshDataWrapper
         TimeStamp = timeStamp;
         this.areasIncluded = chunksIncluded;
         this.meshDataArray = meshDataArray;
+    }
+}
+
+[BurstCompile]
+public struct MeshGenerator : IJob
+{
+    [ReadOnly]
+    public MeshAreaSettings meshSettings;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> heightMap;
+
+    public int meshIndex;
+
+    public Mesh.MeshDataArray meshDataArray;
+
+    public void Execute()
+    {
+        int internalMeshIndex = meshIndex;
+        MeshAreaSettings settings = meshSettings;
+        int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
+        NativeArray<float3> vertices = new(settings.mapDimentions.x * settings.mapDimentions.y, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+        for (uint v = 0; v < vertices.Length; v++)
+        {
+            uint x = v % (uint)settings.mapDimentions.x;
+            uint y = v / (uint)settings.mapDimentions.x;
+            int meshMapIndex = (int)y * settings.mapDimentions.x + (int)x;
+            float3 pos = new(x, heightMap[(int)v].Value, y);
+            vertices[meshMapIndex] = pos;
+            if (x != settings.mapDimentions.x - 1 && y != settings.mapDimentions.y - 1)
+            {
+                int t = ((int)y * (settings.mapDimentions.x - 1) + (int)x) * 3 * 2;
+
+                indicies[t + 0] = v + (uint)settings.mapDimentions.x;
+                indicies[t + 1] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 2] = v;
+
+                indicies[t + 3] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 4] = v + 1;
+                indicies[t + 5] = v;
+            }
+        }
+
+        NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(1, Allocator.Temp);
+        VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+        Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
+        mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
+        mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
+        mesh.GetVertexData<float3>(0).CopyFrom(vertices);
+        mesh.GetIndexData<uint>().CopyFrom(indicies);
+        mesh.subMeshCount = 1;
+        mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));
     }
 }

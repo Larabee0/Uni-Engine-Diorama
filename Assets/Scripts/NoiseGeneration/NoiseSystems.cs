@@ -80,13 +80,20 @@ public struct HeightMapElement : IBufferElementData
 [Serializable]
 public struct SimpleNoise : IComponentData
 {
+    [Range(10, 500)]
+    public int resolution;
+    [Range(0.01f, 10f)]
     public float strength;
-    [Range(1, 8)]
+    [Range(1f, 8f)]
     public int numLayers;
+    [Range(0.01f, 4f)]
     public float baseRoughness;
+    [Range(0.01f, 4f)]
     public float roughness;
+    [Range(0.01f, 4f)]
     public float persistence;
     public float2 centre;
+    [Range(-4f, 4f)]
     public float minValue;
 }
 
@@ -101,7 +108,7 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
         float x = (float)index % areaSettings.mapDimentions.x;
         float y = (float)index / areaSettings.mapDimentions.x;
 
-        float2 percent = new float2(x, y) / (areaSettings.mapDimentions.x - 1);
+        float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
 
         float noiseValue = 0;
         float frequency = simpleNoise.baseRoughness;
