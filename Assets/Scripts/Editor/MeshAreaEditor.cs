@@ -11,9 +11,13 @@ public class MeshAreaEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        if (GUILayout.Button("Generate"))
+        if (GUILayout.Button("Generate 1 layer"))
         {
-            meshArea.Generate();
+            meshArea.GenerateOneLayers();
+        }
+        if (GUILayout.Button("Generate 2 layers"))
+        {
+            meshArea.GenerateTwoLayers();
         }
     }
 

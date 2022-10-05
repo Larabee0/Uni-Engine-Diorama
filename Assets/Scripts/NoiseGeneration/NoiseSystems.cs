@@ -9,6 +9,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using System;
 using System.Runtime.CompilerServices;
+using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 
 public partial class NoiseGenSystem : SystemBase
 {
@@ -71,11 +72,13 @@ public struct GenerateHeightMap : IComponentData { }
 
 public struct HeightMapElement : IBufferElementData
 {
+    public static implicit operator float(HeightMapElement v) { return v.Value; }
+    public static implicit operator HeightMapElement(float v) { return new HeightMapElement { Value = v }; }
     public float Value;
 }
 
 // Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
-// adapted for  2D height map generation by myself
+// adapted for 2D height map generation and C# Jobs by myself
 
 [Serializable]
 public struct SimpleNoise : IComponentData
@@ -97,11 +100,11 @@ public struct SimpleNoise : IComponentData
     public float minValue;
 }
 
+[BurstCompile]
 public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 {
     public SimpleNoise simpleNoise;
     public MeshAreaSettings areaSettings;
-    [WriteOnly]
     public NativeArray<HeightMapElement> HeightMap;
     public void Execute(int index)
     {
@@ -110,7 +113,7 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 
         float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
 
-        float noiseValue = 0;
+        float noiseValue = HeightMap[index];
         float frequency = simpleNoise.baseRoughness;
         float amplitude = 1;
 
@@ -121,8 +124,74 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
             frequency *= simpleNoise.roughness;
             amplitude *= simpleNoise.persistence;
         }
-        HeightMapElement height;
-        height.Value = (noiseValue - simpleNoise.minValue) * simpleNoise.strength;
-        HeightMap[index] = height;
+        noiseValue -= simpleNoise.minValue;
+        HeightMap[index] = noiseValue * simpleNoise.strength;
+    }
+}
+
+// my own algorithims
+[BurstCompile]
+public struct HeightMapClamper : IJobParallelFor
+{
+    public RelativeNoiseData relativeNoiseData;
+    public NativeArray<HeightMapElement> HeightMap;
+    public void Execute(int index)
+    {
+        float value = HeightMap[index];
+        float minValue = math.lerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, relativeNoiseData.flatFloor);
+        HeightMap[index] = math.max(value, minValue) + (0.5f - ((minValue+relativeNoiseData.minMax.y)/2f));
+    }
+}
+
+[BurstCompile]
+public struct HeightMapMinMaxCal : IJob
+{
+    public NativeReference<RelativeNoiseData> minMax;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> HeightMap;
+    public void Execute()
+    {
+        float2 minMax = new(float.MaxValue, float.MinValue);
+        for (int i = 0; i < HeightMap.Length; i++)
+        {
+            float value = HeightMap[i];
+            minMax.x = value < minMax.x ? value: minMax.x;
+            minMax.y = value > minMax.y ? value : minMax.y;
+        }
+        RelativeNoiseData data = this.minMax.Value;
+        data.minMax = minMax;
+        data.mid = (minMax.x + minMax.y) / 2f;
+        this.minMax.Value = data;
+    }
+}
+
+/// <summary>
+/// Job takes 2 height maps, and combines them together into one result
+/// Currently this is weighted by the first height map,
+/// closer to the ceiling of HM1 increases the weight to 1f for HM2
+/// closer to the floor of HM1 lowers the weight to 0f for HM2
+/// </summary>
+[BurstCompile]
+public struct HeightMapLayerer : IJobParallelFor
+{
+    public RelativeNoiseData relative1;
+    public RelativeNoiseData relative2;
+
+    [ReadOnly]
+    public NativeArray<HeightMapElement> HeightMap1;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> HeightMap2;
+
+    [WriteOnly]
+    public NativeArray<HeightMapElement> resultMap;
+    public void Execute(int index)
+    {
+        float hm1 = HeightMap1[index];
+        float hm2 = HeightMap2[index];
+
+        float hm2Weight = math.unlerp(relative1.minMax.x, relative2.minMax.y, hm1);
+
+        resultMap[index] = math.lerp(hm1, hm1+hm2, hm2Weight);
+
     }
 }
