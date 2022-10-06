@@ -191,7 +191,9 @@ public struct HeightMapLayerer : IJobParallelFor
 
         float hm2Weight = math.unlerp(relative1.minMax.x, relative2.minMax.y, hm1);
 
-        resultMap[index] = math.lerp(hm1, hm1+hm2, hm2Weight);
+        float mask = math.lerp(hm1, 1f, hm2Weight);
+
+        resultMap[index] = math.lerp(hm1, hm2, hm2Weight)*mask;
 
     }
 }
