@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(MeshArea))]
 public class MeshAreaEditor : Editor
@@ -11,13 +13,9 @@ public class MeshAreaEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        if (GUILayout.Button("Generate 1 layer"))
+        if (GUILayout.Button("Generate"))
         {
-            meshArea.GenerateOneLayers();
-        }
-        if (GUILayout.Button("Generate 2 layers"))
-        {
-            meshArea.GenerateTwoLayers();
+            meshArea.Generate();
         }
     }
 

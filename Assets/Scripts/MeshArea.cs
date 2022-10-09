@@ -8,6 +8,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using System;
+using Cinemachine;
+using static UnityEditor.Rendering.CameraUI;
 
 /// <summary>
 /// IConvertGameObjectToEntity gets called when a gameobject converts into an entity
@@ -17,67 +19,89 @@ using System;
 /// </summary>
 public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 {
+    [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private MeshAreaSettings mapSettings;
-    [SerializeField] private SimpleNoise simpleNoise;
 
-    [SerializeField] private SimpleNoise simpleNoiseLayer2;
+    [SerializeField] private SimpleNoise[] simpleLayers;
+    [Space(150f)]
+    [SerializeField] private RigidNoise rigidNoise;
 
+    [SerializeField] private RelativeNoiseData relativeNoiseData1;
+    [SerializeField] private RelativeNoiseData relativeNoiseData2;
+
+
+    [SerializeField] private FirstLayer singleLayer;
     [SerializeField] private bool UpdateOnChange;
-    [SerializeField] private bool SecondLayer;
+
     private Mesh activeMesh;
 
     private void Awake()
     {
-        GetComponent<MeshFilter>().mesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+        meshFilter=GetComponent<MeshFilter>();
+        meshFilter.mesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
     }
 
     private void OnValidate()
     {
         if (UpdateOnChange)
         {
-            if (SecondLayer)
+            Generate();
+        }
+    }
+
+    public void Generate()
+    {
+        NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
+        NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
+
+        GenerateSimpleMaps(baseMap,result, true);
+        baseMap.Dispose();
+        GenerateHeightMapMesh(result);
+    }
+
+    public void GenerateSimpleMaps(NativeArray<HeightMapElement> baseMap, NativeArray<HeightMapElement> result, bool firstLayer =false)
+    {
+        for (int i = 0; i < simpleLayers.Length; i++)
+        {
+            SimpleNoise settings = simpleLayers[i];
+            if (i > 0 ^!firstLayer)
             {
-                GenerateTwoLayers();
+                NativeArray<HeightMapElement> current = new(result.Length, Allocator.TempJob);
+                GenerateHeightMap(current, settings);
+                if (settings.clampToFlatFloor)
+                {
+                    ClampToFlatFloor(current, settings);
+                }
+                LayerTwoHeightMaps(new(settings,baseMap),new(settings, current), new(settings, result));
+                current.Dispose();
             }
             else
             {
-                GenerateOneLayers();
+                GenerateHeightMap(baseMap, settings);
+                if (settings.clampToFlatFloor)
+                {
+                    ClampToFlatFloor(baseMap, settings);
+                }
+                result.CopyFrom(baseMap);
             }
         }
     }
 
-    public void GenerateOneLayers()
+    private void LayerTwoHeightMaps(SimpleHeightMapWrapper baseMap, SimpleHeightMapWrapper newMap, SimpleHeightMapWrapper result)
     {
-        NativeArray<HeightMapElement> heightMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
-        GenerateHeightMap(heightMap, simpleNoise);
-        ClampToFlatFloor(heightMap);
 
-        GenerateHeightMapMesh(heightMap);
-    }
-
-    public void GenerateTwoLayers()
-    {
-        NativeArray<HeightMapElement> heightMapLayer1 = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
-        
-        NativeArray<HeightMapElement> finalMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-
-        GenerateHeightMap(heightMapLayer1, simpleNoise);
-        ClampToFlatFloor(heightMapLayer1);
-        NativeArray<HeightMapElement> heightMapLayer2 = new(heightMapLayer1, Allocator.TempJob);
-        GenerateHeightMap(heightMapLayer2, simpleNoiseLayer2);
-
+        baseMap.noiseData =relativeNoiseData1= CalculateRelativeNoiseData(baseMap.heightMap);
+        newMap.noiseData = relativeNoiseData2 = CalculateRelativeNoiseData(newMap.heightMap);
+        newMap.noiseData.minValue = newMap.simpleNoise.riseUp;
         var layerer = new HeightMapLayerer
         {
-            relative1 = CalculateRelativeNoiseData(heightMapLayer1),
-            relative2 = CalculateRelativeNoiseData(heightMapLayer2),
-            HeightMap1 = heightMapLayer1,
-            HeightMap2 = heightMapLayer2,
-            resultMap = finalMap
+            baseRelative = baseMap.noiseData,
+            heightMapRelative = newMap.noiseData,
+            baseMap = baseMap.heightMap,
+            heightMap = newMap.heightMap,
+            result = result.heightMap
         };
-        layerer.Schedule(finalMap.Length, 64).Complete();
-        heightMapLayer1.Dispose();
-        heightMapLayer2.Dispose();
-        GenerateHeightMapMesh(finalMap);
+        layerer.Schedule(result.heightMap.Length, 64).Complete();
     }
 
     /// <summary>
@@ -86,7 +110,15 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     /// <param name="heightMap">Height map to produce mesh of</param>
     public void GenerateHeightMapMesh(NativeArray<HeightMapElement> heightMap)
     {
-        activeMesh = GetComponent<MeshFilter>().sharedMesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+        if(activeMesh == null)
+        {
+            activeMesh = meshFilter.sharedMesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+        }
+        else
+        {
+            activeMesh.Clear();
+        }
+        
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         var generator = new MeshGenerator
@@ -115,7 +147,19 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         {
             areaSettings = mapSettings,
             simpleNoise = noiseSettings,
-            HeightMap = heightMap
+            heightMap = heightMap
+        };
+
+        noiseGenerator.Schedule(heightMap.Length, 64).Complete();
+    }
+
+    public void GenerateRigidHeightMap(NativeArray<HeightMapElement> heightMap,RigidNoise noiseSettings)
+    {
+        var noiseGenerator = new RigidNoiseHeightMapGenerator
+        {
+            areaSettings = mapSettings,
+            rigidNoise = noiseSettings,
+            heightMap = heightMap
         };
 
         noiseGenerator.Schedule(heightMap.Length, 64).Complete();
@@ -142,7 +186,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
         heightMapMinMaxer.Schedule().Complete();
         RelativeNoiseData data = relativeData.Value;
-        data.flatFloor = mapSettings.minValue;
+        data.flatFloor = mapSettings.floorPercentage;
         relativeData.Dispose();
         return data;
     }
@@ -151,11 +195,28 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     /// Clamps the height maps min value by the given flatFloor percetange
     /// </summary>
     /// <param name="heightMap"></param>
-    public void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap)
+    public void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap,SimpleNoise noiseSettings)
     {
+        RelativeNoiseData data = CalculateRelativeNoiseData(heightMap);
+        data.flatFloor = mapSettings.floorPercentage;
+        data.minValue = noiseSettings.minValue;
         var heightMapClamper = new HeightMapClamper
         {
-            relativeNoiseData = CalculateRelativeNoiseData(heightMap),
+            relativeNoiseData = data,
+            HeightMap = heightMap
+        };
+
+        heightMapClamper.Schedule(heightMap.Length, 64).Complete();
+    }
+
+    public void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap, RigidNoise noiseSettings)
+    {
+        RelativeNoiseData data = CalculateRelativeNoiseData(heightMap);
+        data.flatFloor = mapSettings.floorPercentage;
+        data.minValue = noiseSettings.minValue;
+        var heightMapClamper = new HeightMapClamper
+        {
+            relativeNoiseData = data,
             HeightMap = heightMap
         };
 
@@ -167,7 +228,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         MeshAreaRef mesh = new() { Value = GetComponent<MeshFilter>().mesh };
 
         dstManager.AddComponentData(entity, mapSettings);
-        dstManager.AddComponentData(entity, simpleNoise);
+        dstManager.AddComponentData(entity, simpleLayers[0]);
         dstManager.AddComponentData(entity, mesh);
         dstManager.AddComponent<UpdateMeshArea>(entity);
         dstManager.AddComponent<GenerateHeightMap>(entity);
@@ -191,14 +252,37 @@ public struct MeshAreaSettings : IComponentData
 {
     public int2 mapDimentions;
     [Range(0f,1f)]
-    public float minValue;
+    public float floorPercentage;
 }
 
+[Serializable]
 public struct RelativeNoiseData : IComponentData
 {
     public float2 minMax;
     public float mid;
     public float flatFloor;
+    [HideInInspector] public float minValue;
+}
+
+
+public struct SimpleHeightMapWrapper
+{
+    public SimpleNoise simpleNoise;
+    public RelativeNoiseData noiseData;
+    public NativeArray<HeightMapElement> heightMap;
+
+    public SimpleHeightMapWrapper(SimpleNoise simpleNoise, NativeArray<HeightMapElement> heightMap) : this()
+    {
+        this.simpleNoise = simpleNoise;
+        this.heightMap = heightMap;
+    }
+}
+
+public struct RigidHeightMapWrapper
+{
+    public RigidNoise rigidNoise;
+    public RelativeNoiseData noiseData;
+    public NativeArray<HeightMapElement> heightMap;
 }
 
 public struct UpdatingMeshArea : IComponentData { public double timeStamp; }
@@ -206,3 +290,9 @@ public struct UpdatingMeshArea : IComponentData { public double timeStamp; }
 // components that do not declare any members are automatically catagoised as tagging components.
 public struct UpdateMeshArea : IComponentData { }
 public struct MeshAreaTriangulatorRun : IComponentData { }
+
+public enum FirstLayer
+{
+    Simple,
+    Rigid
+}

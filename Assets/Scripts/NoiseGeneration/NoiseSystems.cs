@@ -54,7 +54,7 @@ public partial class NoiseGenSystem : SystemBase
                 {
                     areaSettings = areaComps[i],
                     simpleNoise = noiseComps[i],
-                    HeightMap = heightMap
+                    heightMap = heightMap
                 };
 
                 heightMapGen.Schedule(heightMap.Length, 64).Complete();
@@ -83,7 +83,8 @@ public struct HeightMapElement : IBufferElementData
 [Serializable]
 public struct SimpleNoise : IComponentData
 {
-    [Range(10, 500)]
+    public bool clampToFlatFloor;
+    [Range(2, 500)]
     public int resolution;
     [Range(0.01f, 10f)]
     public float strength;
@@ -97,7 +98,35 @@ public struct SimpleNoise : IComponentData
     public float persistence;
     public float2 centre;
     [Range(-4f, 4f)]
+    public float offsetValue;
+    [Range(-10f,10f)]
     public float minValue;
+    [Range(-1f, 1f)]
+    public float riseUp;
+}
+
+[Serializable]
+public struct RigidNoise : IComponentData
+{
+    public bool clampToFlatFloor;
+    [Range(2, 500)]
+    public int resolution;
+    [Range(0.01f, 10f)]
+    public float strength;
+    [Range(1f, 8f)]
+    public int numLayers;
+    [Range(0.01f, 4f)]
+    public float baseRoughness;
+    [Range(0.01f, 4f)]
+    public float roughness;
+    [Range(0.01f, 4f)]
+    public float persistence;
+    public float2 centre;
+    [Range(-4f, 4f)]
+    public float offsetValue;
+    [Range(-10f, 10f)]
+    public float minValue;
+    public float weightMultiplier;
 }
 
 [BurstCompile]
@@ -105,7 +134,7 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 {
     public SimpleNoise simpleNoise;
     public MeshAreaSettings areaSettings;
-    public NativeArray<HeightMapElement> HeightMap;
+    public NativeArray<HeightMapElement> heightMap;
     public void Execute(int index)
     {
         float x = (float)index % areaSettings.mapDimentions.x;
@@ -113,7 +142,7 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 
         float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
 
-        float noiseValue = HeightMap[index];
+        float noiseValue = heightMap[index];
         float frequency = simpleNoise.baseRoughness;
         float amplitude = 1;
 
@@ -124,10 +153,46 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
             frequency *= simpleNoise.roughness;
             amplitude *= simpleNoise.persistence;
         }
-        noiseValue -= simpleNoise.minValue;
-        HeightMap[index] = noiseValue * simpleNoise.strength;
+        //noiseValue -= simpleNoise.offsetValue;
+        heightMap[index] = noiseValue * simpleNoise.strength;
     }
 }
+
+[BurstCompile]
+public struct RigidNoiseHeightMapGenerator : IJobParallelFor
+{
+    public RigidNoise rigidNoise;
+    public MeshAreaSettings areaSettings;
+    public NativeArray<HeightMapElement> heightMap;
+    public void Execute(int index)
+    {
+        float x = (float)index % areaSettings.mapDimentions.x;
+        float y = (float)index / areaSettings.mapDimentions.x;
+
+        float2 percent = new float2(x, y) / (rigidNoise.resolution - 1);
+
+        float noiseValue = heightMap[index];
+        float frequency = rigidNoise.baseRoughness;
+        float amplitude = 1;
+        float weight = 1;
+
+        for (int i = 0; i < rigidNoise.numLayers; i++)
+        {
+            float v = 1 - math.abs(noise.cnoise(percent * frequency + rigidNoise.centre));
+            v *= v;
+            v *= weight;
+            weight = math.clamp(v*rigidNoise.weightMultiplier,0f, 1f);
+
+            noiseValue += v * amplitude;
+            frequency *= rigidNoise.roughness;
+            amplitude *= rigidNoise.persistence;
+        }
+
+        noiseValue -= rigidNoise.offsetValue;
+        heightMap[index] = noiseValue * rigidNoise.strength;
+    }
+}
+
 
 // my own algorithims
 [BurstCompile]
@@ -138,8 +203,9 @@ public struct HeightMapClamper : IJobParallelFor
     public void Execute(int index)
     {
         float value = HeightMap[index];
+        float zeroOffset = (relativeNoiseData.minValue - relativeNoiseData.minMax.x);
         float minValue = math.lerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, relativeNoiseData.flatFloor);
-        HeightMap[index] = math.max(value, minValue) + (0.5f - ((minValue+relativeNoiseData.minMax.y)/2f));
+        HeightMap[index] = math.max(value, minValue)+ zeroOffset;
     }
 }
 
@@ -174,26 +240,31 @@ public struct HeightMapMinMaxCal : IJob
 [BurstCompile]
 public struct HeightMapLayerer : IJobParallelFor
 {
-    public RelativeNoiseData relative1;
-    public RelativeNoiseData relative2;
+    public RelativeNoiseData baseRelative;
+     public RelativeNoiseData heightMapRelative;
+    // public RelativeNoiseData relative2;
 
     [ReadOnly]
-    public NativeArray<HeightMapElement> HeightMap1;
-    [ReadOnly]
-    public NativeArray<HeightMapElement> HeightMap2;
+    public NativeArray<HeightMapElement> baseMap;
 
-    [WriteOnly]
-    public NativeArray<HeightMapElement> resultMap;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> heightMap;
+
+    public NativeArray<HeightMapElement> result;
     public void Execute(int index)
     {
-        float hm1 = HeightMap1[index];
-        float hm2 = HeightMap2[index];
+        float baseValue = baseMap[index];
+        float hm = heightMap[index];
 
-        float hm2Weight = math.unlerp(relative1.minMax.x, relative2.minMax.y, hm1);
+        float baseWeight = math.unlerp(baseRelative.minMax.x, baseRelative.minMax.y, baseValue);
+        float hmWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, baseValue);
 
-        float mask = math.lerp(hm1, 1f, hm2Weight);
+        float riseUp =  math.lerp(heightMapRelative.minValue, hmWeight, baseWeight) ;
+        float mask = math.lerp(result[index], hm+riseUp, hmWeight * baseWeight* riseUp);
 
-        resultMap[index] = math.lerp(hm1, hm2, hm2Weight)*mask;
+        // result[index] +=  hm * baseValue;
 
+        result[index] = mask;
+        //result[index] = math.lerp(result[index], hm* mask, hmWeight);
     }
 }
