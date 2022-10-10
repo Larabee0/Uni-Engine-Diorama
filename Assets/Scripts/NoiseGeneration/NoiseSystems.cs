@@ -300,7 +300,8 @@ public struct HeightMapLayerer : IJobParallelFor
         float hm = heightMap[index].Value;
 
         float baseWeight = math.unlerp(baseRelative.minMax.x, baseRelative.minMax.y, baseValue);
-        float hmWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, baseValue);
+        float hmWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, hm);
+        float hmBaseWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, baseValue);
 
         float riseUp =  math.lerp(heightMapRelative.minValue, hmWeight, baseWeight) ;
         float mask = math.lerp(element.Value, element.Value+hm ,  baseWeight);
@@ -309,8 +310,15 @@ public struct HeightMapLayerer : IJobParallelFor
 
         // result[index] +=  hm * baseValue;
 
+
+        if (element.Value < mask)
+        {
+            float extraWeight = math.clamp(mask - element.Value, 0.0f, 1.0f);
+            element.Colour = math.lerp(element.Colour, heightMap[index].Colour, extraWeight);
+        }
         element.Value = math.max(element.Value, mask);
-        element.Colour = element.Value == mask ? colourMask:element.Colour;
+
+        //element.Colour = element.Value == mask ? colourMask:element.Colour;
         result[index] = element;
         //result[index] = math.lerp(result[index], hm* mask, hmWeight);
     }
