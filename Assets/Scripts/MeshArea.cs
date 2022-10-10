@@ -20,6 +20,7 @@ using static UnityEditor.Rendering.CameraUI;
 public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 {
     [SerializeField] private MeshFilter meshFilter;
+    [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [SerializeField] private SimpleNoise[] simpleLayers;
@@ -34,6 +35,8 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private bool UpdateOnChange;
 
     private Mesh activeMesh;
+    private Material meshMat;
+    private Texture2D texture;
 
     private void Awake()
     {
@@ -118,11 +121,22 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         {
             activeMesh.Clear();
         }
-        
+
+        meshRenderer.sharedMaterial.mainTexture = texture = new Texture2D(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false,true);
+        texture.filterMode = FilterMode.Trilinear;
+
+        var texturePainter = new FillTexture
+        {
+            source = heightMap,
+            Destination = texture.GetPixelData<Color32>(0)
+        };
+        texturePainter.Schedule(heightMap.Length, 64).Complete();
+        texture.Apply();
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         var generator = new MeshGenerator
         {
+            relativeHeightMapData = CalculateRelativeNoiseData(heightMap),
             meshSettings = mapSettings,
             meshIndex = 0,
             meshDataArray = meshDataArray,
@@ -151,6 +165,8 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         };
 
         noiseGenerator.Schedule(heightMap.Length, 64).Complete();
+
+        ColourHeightMap(heightMap, noiseSettings);
     }
 
     public void GenerateRigidHeightMap(NativeArray<HeightMapElement> heightMap,RigidNoise noiseSettings)
@@ -163,6 +179,17 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         };
 
         noiseGenerator.Schedule(heightMap.Length, 64).Complete();
+    }
+
+    public void ColourHeightMap(NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings)
+    {
+        var colouringJob = new HeightMapPainter
+        {
+            noiseSettings = noiseSettings,
+            relativeNoiseData = CalculateRelativeNoiseData(heightMap),
+            HeightMap = heightMap
+        };
+        colouringJob.Schedule(heightMap.Length, 64).Complete();
     }
 
     /// <summary>
@@ -202,6 +229,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         data.minValue = noiseSettings.minValue;
         var heightMapClamper = new HeightMapClamper
         {
+            floorColour = mapSettings.floorColour,
             relativeNoiseData = data,
             HeightMap = heightMap
         };
@@ -253,6 +281,9 @@ public struct MeshAreaSettings : IComponentData
     public int2 mapDimentions;
     [Range(0f,1f)]
     public float floorPercentage;
+    public Color32 floorColour;
+    public Color32 lower;
+    public Color32 higher;
 }
 
 [Serializable]

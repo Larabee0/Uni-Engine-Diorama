@@ -317,6 +317,7 @@ public struct MeshDataWrapper
 [BurstCompile]
 public struct MeshGenerator : IJob
 {
+    public RelativeNoiseData relativeHeightMapData;
     [ReadOnly]
     public MeshAreaSettings meshSettings;
     [ReadOnly]
@@ -331,7 +332,10 @@ public struct MeshGenerator : IJob
         int internalMeshIndex = meshIndex;
         MeshAreaSettings settings = meshSettings;
         int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
+        
         NativeArray<float3> vertices = new(settings.mapDimentions.x * settings.mapDimentions.y, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float4> vertexColours = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float2> uv1 = new (vertices.Length,Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
         for (uint v = 0; v < vertices.Length; v++)
@@ -340,6 +344,10 @@ public struct MeshGenerator : IJob
             uint y = v / (uint)settings.mapDimentions.x;
             int meshMapIndex = (int)y * settings.mapDimentions.x + (int)x;
             float3 pos = new(x, heightMap[(int)v].Value, y);
+            
+
+            vertexColours[meshMapIndex] = heightMap[(int)v].Colour;
+            uv1[meshMapIndex] = new float2(math.unlerp(0,settings.mapDimentions.x,x),math.unlerp(0,settings.mapDimentions.y,y));
             vertices[meshMapIndex] = pos;
             if (x != settings.mapDimentions.x - 1 && y != settings.mapDimentions.y - 1)
             {
@@ -355,12 +363,16 @@ public struct MeshGenerator : IJob
             }
         }
 
-        NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(1, Allocator.Temp);
+        NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(3, Allocator.Temp);
         VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4, 1);
+        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 2);
         Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
         mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
         mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
         mesh.GetVertexData<float3>(0).CopyFrom(vertices);
+        mesh.GetVertexData<float4>(1).CopyFrom(vertexColours);
+        mesh.GetVertexData<float2>(2).CopyFrom(uv1);
         mesh.GetIndexData<uint>().CopyFrom(indicies);
         mesh.subMeshCount = 1;
         mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));

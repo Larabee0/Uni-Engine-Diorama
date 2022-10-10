@@ -72,9 +72,8 @@ public struct GenerateHeightMap : IComponentData { }
 
 public struct HeightMapElement : IBufferElementData
 {
-    public static implicit operator float(HeightMapElement v) { return v.Value; }
-    public static implicit operator HeightMapElement(float v) { return new HeightMapElement { Value = v }; }
     public float Value;
+    public float4 Colour;
 }
 
 // Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
@@ -103,6 +102,9 @@ public struct SimpleNoise : IComponentData
     public float minValue;
     [Range(-1f, 1f)]
     public float riseUp;
+
+    public Color lower;
+    public Color upper;
 }
 
 [Serializable]
@@ -141,8 +143,8 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
         float y = (float)index / areaSettings.mapDimentions.x;
 
         float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
-
-        float noiseValue = heightMap[index];
+        HeightMapElement element = heightMap[index];
+        float noiseValue = element.Value;
         float frequency = simpleNoise.baseRoughness;
         float amplitude = 1;
 
@@ -154,7 +156,8 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
             amplitude *= simpleNoise.persistence;
         }
         //noiseValue -= simpleNoise.offsetValue;
-        heightMap[index] = noiseValue * simpleNoise.strength;
+        element.Value = noiseValue * simpleNoise.strength;
+        heightMap[index] = element;
     }
 }
 
@@ -171,7 +174,8 @@ public struct RigidNoiseHeightMapGenerator : IJobParallelFor
 
         float2 percent = new float2(x, y) / (rigidNoise.resolution - 1);
 
-        float noiseValue = heightMap[index];
+        HeightMapElement element = heightMap[index];
+        float noiseValue = element.Value;
         float frequency = rigidNoise.baseRoughness;
         float amplitude = 1;
         float weight = 1;
@@ -189,7 +193,8 @@ public struct RigidNoiseHeightMapGenerator : IJobParallelFor
         }
 
         noiseValue -= rigidNoise.offsetValue;
-        heightMap[index] = noiseValue * rigidNoise.strength;
+        element.Value = noiseValue * rigidNoise.strength;
+        heightMap[index] = element;
     }
 }
 
@@ -198,14 +203,19 @@ public struct RigidNoiseHeightMapGenerator : IJobParallelFor
 [BurstCompile]
 public struct HeightMapClamper : IJobParallelFor
 {
+    public Color floorColour;
     public RelativeNoiseData relativeNoiseData;
     public NativeArray<HeightMapElement> HeightMap;
     public void Execute(int index)
     {
-        float value = HeightMap[index];
+        HeightMapElement element = HeightMap[index];
+        float value = element.Value;
         float zeroOffset = (relativeNoiseData.minValue - relativeNoiseData.minMax.x);
         float minValue = math.lerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, relativeNoiseData.flatFloor);
-        HeightMap[index] = math.max(value, minValue)+ zeroOffset;
+        element.Value = math.max(value, minValue) + zeroOffset;
+        element.Colour = element.Value == value + zeroOffset ? element.Colour:(Vector4)floorColour;
+
+        HeightMap[index] = element;
     }
 }
 
@@ -220,7 +230,7 @@ public struct HeightMapMinMaxCal : IJob
         float2 minMax = new(float.MaxValue, float.MinValue);
         for (int i = 0; i < HeightMap.Length; i++)
         {
-            float value = HeightMap[i];
+            float value = HeightMap[i].Value;
             minMax.x = value < minMax.x ? value: minMax.x;
             minMax.y = value > minMax.y ? value : minMax.y;
         }
@@ -228,6 +238,38 @@ public struct HeightMapMinMaxCal : IJob
         data.minMax = minMax;
         data.mid = (minMax.x + minMax.y) / 2f;
         this.minMax.Value = data;
+    }
+}
+
+[BurstCompile]
+public struct HeightMapPainter : IJobParallelFor
+{
+    public SimpleNoise noiseSettings;
+    public RelativeNoiseData relativeNoiseData;
+
+    public NativeArray<HeightMapElement> HeightMap;
+    public void Execute(int index)
+    {
+        HeightMapElement element = HeightMap[index];
+        float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
+
+        element.Colour= (Vector4)Color.Lerp(noiseSettings.lower, noiseSettings.upper, weight);
+        HeightMap[index] = element;
+    }
+}
+
+
+
+[BurstCompile]
+public struct FillTexture : IJobParallelFor
+{
+    [ReadOnly]
+    public NativeArray<HeightMapElement> source;
+    [WriteOnly]
+    public NativeArray<Color32> Destination;
+    public void Execute(int i)
+    {
+        Destination[i] = (Color)(Vector4)source[i].Colour;
     }
 }
 
@@ -253,18 +295,49 @@ public struct HeightMapLayerer : IJobParallelFor
     public NativeArray<HeightMapElement> result;
     public void Execute(int index)
     {
-        float baseValue = baseMap[index];
-        float hm = heightMap[index];
+        HeightMapElement element = result[index];
+        float baseValue = baseMap[index].Value;
+        float hm = heightMap[index].Value;
 
         float baseWeight = math.unlerp(baseRelative.minMax.x, baseRelative.minMax.y, baseValue);
         float hmWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, baseValue);
 
         float riseUp =  math.lerp(heightMapRelative.minValue, hmWeight, baseWeight) ;
-        float mask = math.lerp(result[index], hm+riseUp, hmWeight * baseWeight* riseUp);
+        float mask = math.lerp(element.Value, element.Value+hm ,  baseWeight);
+        float4 colourMask = math.lerp(element.Colour, heightMap[index].Colour, baseWeight);
+
 
         // result[index] +=  hm * baseValue;
 
-        result[index] = mask;
+        element.Value = math.max(element.Value, mask);
+        element.Colour = element.Value == mask ? colourMask:element.Colour;
+        result[index] = element;
+        //result[index] = math.lerp(result[index], hm* mask, hmWeight);
+    }
+
+
+    private Color BlendWithNeighbours()
+    {
+        // go throug the 4 neighbouring nodes and blend the colours between them and the current
+        // this needst to be impemeneted in a seperate job run at the end  - run it in the texture generator.
+        return  Color.white;
+    }
+
+    private void StartOfDayExecute(int index)
+    {
+        float baseValue = baseMap[index].Value;
+        float hm = heightMap[index].Value;
+
+        float baseWeight = math.unlerp(baseRelative.minMax.x, baseRelative.minMax.y, baseValue);
+        float hmWeight = math.unlerp(heightMapRelative.minMax.x, heightMapRelative.minMax.y, baseValue);
+
+        float riseUp = math.lerp(heightMapRelative.minValue, hmWeight, baseWeight);
+        float mask = math.lerp(result[index].Value, hm + riseUp, hmWeight * baseWeight * riseUp);
+
+        // result[index] +=  hm * baseValue;
+        HeightMapElement element = result[index];
+        element.Value = mask;
+        result[index] = element;
         //result[index] = math.lerp(result[index], hm* mask, hmWeight);
     }
 }
