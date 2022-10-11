@@ -31,6 +31,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private RelativeNoiseData relativeNoiseData2;
 
 
+    [SerializeField] private FilterMode textureFilterMode;
     [SerializeField] private FirstLayer singleLayer;
     [SerializeField] private bool UpdateOnChange;
 
@@ -122,16 +123,16 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             activeMesh.Clear();
         }
 
-        meshRenderer.sharedMaterial.mainTexture = texture = new Texture2D(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false,true);
-        texture.filterMode = FilterMode.Trilinear;
-
-        var texturePainter = new FillTexture
-        {
-            source = heightMap,
-            Destination = texture.GetPixelData<Color32>(0)
-        };
-        texturePainter.Schedule(heightMap.Length, 64).Complete();
-        texture.Apply();
+        // meshRenderer.sharedMaterial.mainTexture = texture = new Texture2D(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false,true);
+        // texture.filterMode = textureFilterMode;
+        // 
+        // var texturePainter = new FillTexture
+        // {
+        //     source = heightMap,
+        //     Destination = texture.GetPixelData<Color32>(0)
+        // };
+        // texturePainter.Schedule(heightMap.Length, 64).Complete();
+        // texture.Apply();
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         var generator = new MeshGenerator

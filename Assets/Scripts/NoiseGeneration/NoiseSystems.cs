@@ -212,8 +212,19 @@ public struct HeightMapClamper : IJobParallelFor
         float value = element.Value;
         float zeroOffset = (relativeNoiseData.minValue - relativeNoiseData.minMax.x);
         float minValue = math.lerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, relativeNoiseData.flatFloor);
+
+        if(element.Value < minValue)
+        {
+            float colourWeight = math.clamp(minValue - element.Value, 0.0f, 1.0f);
+            element.Colour = math.lerp( element.Colour, (Vector4)floorColour, colourWeight);
+        }
+        // else
+        // {
+        //     element.Colour = element.Value == value + zeroOffset ? element.Colour : (Vector4)floorColour;
+        // }
+
         element.Value = math.max(value, minValue) + zeroOffset;
-        element.Colour = element.Value == value + zeroOffset ? element.Colour:(Vector4)floorColour;
+        
 
         HeightMap[index] = element;
     }
