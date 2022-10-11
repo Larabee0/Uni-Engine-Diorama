@@ -24,7 +24,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [SerializeField] private SimpleNoise[] simpleLayers;
-    [Space(150f)]
+    [Space(200f)]
     [SerializeField] private RigidNoise rigidNoise;
 
     [SerializeField] private RelativeNoiseData relativeNoiseData1;
@@ -135,7 +135,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         // texture.Apply();
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
-        var generator = new MeshGenerator
+        var generator = new MeshGeneratorBVC
         {
             relativeHeightMapData = CalculateRelativeNoiseData(heightMap),
             meshSettings = mapSettings,

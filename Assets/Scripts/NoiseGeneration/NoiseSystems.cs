@@ -74,6 +74,7 @@ public struct HeightMapElement : IBufferElementData
 {
     public float Value;
     public float4 Colour;
+    public float4x2 upperLowerColours;
 }
 
 // Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
@@ -102,6 +103,11 @@ public struct SimpleNoise : IComponentData
     public float minValue;
     [Range(-1f, 1f)]
     public float riseUp;
+
+    [Range(0f, 1f)]
+    public float slopeThreshold;
+    [Range(0f, 1f)]
+    public float blendAmount;
 
     public Color lower;
     public Color upper;
@@ -212,16 +218,20 @@ public struct HeightMapClamper : IJobParallelFor
         float value = element.Value;
         float zeroOffset = (relativeNoiseData.minValue - relativeNoiseData.minMax.x);
         float minValue = math.lerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, relativeNoiseData.flatFloor);
+        /// // VC
+        /// if(element.Value < minValue)
+        /// {
+        ///     float colourWeight = math.clamp(minValue - element.Value, 0.0f, 1.0f);
+        ///     element.Colour = math.lerp( element.Colour, (Vector4)floorColour, colourWeight);
+        /// }
 
         if(element.Value < minValue)
         {
             float colourWeight = math.clamp(minValue - element.Value, 0.0f, 1.0f);
-            element.Colour = math.lerp( element.Colour, (Vector4)floorColour, colourWeight);
+            element.Colour.x = colourWeight;
+            element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, (Vector4)floorColour, colourWeight);
+            // element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, colourWeight);
         }
-        // else
-        // {
-        //     element.Colour = element.Value == value + zeroOffset ? element.Colour : (Vector4)floorColour;
-        // }
 
         element.Value = math.max(value, minValue) + zeroOffset;
         
@@ -265,6 +275,12 @@ public struct HeightMapPainter : IJobParallelFor
         float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
 
         element.Colour= (Vector4)Color.Lerp(noiseSettings.lower, noiseSettings.upper, weight);
+
+        // BVC
+        element.Colour.x = weight;
+        element.Colour.y = noiseSettings.slopeThreshold;
+        element.Colour.z = noiseSettings.blendAmount;
+        element.upperLowerColours = new float4x2((Vector4)noiseSettings.lower, (Vector4)noiseSettings.upper);
         HeightMap[index] = element;
     }
 }
@@ -304,7 +320,31 @@ public struct HeightMapLayerer : IJobParallelFor
     public NativeArray<HeightMapElement> heightMap;
 
     public NativeArray<HeightMapElement> result;
+
+    // BVC
     public void Execute(int index)
+    {
+        HeightMapElement element = result[index];
+        float baseValue = baseMap[index].Value;
+        float hm = heightMap[index].Value;
+
+        float baseWeight = math.unlerp(baseRelative.minMax.x, baseRelative.minMax.y, baseValue);
+
+        float mask = math.lerp(element.Value, element.Value + hm, baseWeight);
+
+        if (element.Value < mask)
+        {
+            float extraWeight = math.clamp(mask - element.Value, 0.0f, 1.0f);
+            element.Colour = math.lerp(element.Colour, heightMap[index].Colour, extraWeight);
+            element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
+            element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
+        }
+        element.Value = math.max(element.Value, mask);
+
+        result[index] = element;
+    }
+
+    public void ExecuteVC(int index)
     {
         HeightMapElement element = result[index];
         float baseValue = baseMap[index].Value;
@@ -318,10 +358,6 @@ public struct HeightMapLayerer : IJobParallelFor
         float mask = math.lerp(element.Value, element.Value+hm ,  baseWeight);
         float4 colourMask = math.lerp(element.Colour, heightMap[index].Colour, baseWeight);
 
-
-        // result[index] +=  hm * baseValue;
-
-
         if (element.Value < mask)
         {
             float extraWeight = math.clamp(mask - element.Value, 0.0f, 1.0f);
@@ -334,7 +370,7 @@ public struct HeightMapLayerer : IJobParallelFor
         //result[index] = math.lerp(result[index], hm* mask, hmWeight);
     }
 
-
+    // not going to implement
     private Color BlendWithNeighbours()
     {
         // go throug the 4 neighbouring nodes and blend the colours between them and the current
@@ -342,6 +378,7 @@ public struct HeightMapLayerer : IJobParallelFor
         return  Color.white;
     }
 
+    // thursday 06 october
     private void StartOfDayExecute(int index)
     {
         float baseValue = baseMap[index].Value;
