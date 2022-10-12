@@ -123,17 +123,6 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             activeMesh.Clear();
         }
 
-        // meshRenderer.sharedMaterial.mainTexture = texture = new Texture2D(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false,true);
-        // texture.filterMode = textureFilterMode;
-        // 
-        // var texturePainter = new FillTexture
-        // {
-        //     source = heightMap,
-        //     Destination = texture.GetPixelData<Color32>(0)
-        // };
-        // texturePainter.Schedule(heightMap.Length, 64).Complete();
-        // texture.Apply();
-
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         var generator = new MeshGeneratorBVC
         {

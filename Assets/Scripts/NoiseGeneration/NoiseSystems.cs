@@ -74,6 +74,7 @@ public struct HeightMapElement : IBufferElementData
 {
     public float Value;
     public float4 Colour;
+    public float2 slopeBlend;
     public float4x2 upperLowerColours;
 }
 
@@ -278,8 +279,7 @@ public struct HeightMapPainter : IJobParallelFor
 
         // BVC
         element.Colour.x = weight;
-        element.Colour.y = noiseSettings.slopeThreshold;
-        element.Colour.z = noiseSettings.blendAmount;
+        element.slopeBlend =new( noiseSettings.slopeThreshold,noiseSettings.blendAmount);
         element.upperLowerColours = new float4x2((Vector4)noiseSettings.lower, (Vector4)noiseSettings.upper);
         HeightMap[index] = element;
     }
@@ -336,6 +336,7 @@ public struct HeightMapLayerer : IJobParallelFor
         {
             float extraWeight = math.clamp(mask - element.Value, 0.0f, 1.0f);
             element.Colour = math.lerp(element.Colour, heightMap[index].Colour, extraWeight);
+            element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
             element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
             element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
         }

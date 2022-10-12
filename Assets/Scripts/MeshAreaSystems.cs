@@ -400,9 +400,8 @@ public struct MeshGeneratorBVC : IJob
         int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
 
         NativeArray<float3> vertices = new(settings.mapDimentions.x * settings.mapDimentions.y, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        NativeArray<float4> vertexColours = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        NativeArray<float3> uv0 = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        NativeArray<float3> uv1 = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float4> uv0 = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float3x2> uv1and2 = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
         for (uint v = 0; v < vertices.Length; v++)
@@ -412,12 +411,13 @@ public struct MeshGeneratorBVC : IJob
             int meshMapIndex = (int)y * settings.mapDimentions.x + (int)x;
             float3 pos = new(x, heightMap[(int)v].Value, y);
 
-            // new float3(0.3098039f, 0.3411765f,0f);
-            // new float3(0.3568627f, 0.2980392f, 0.2745098f);
-            vertexColours[meshMapIndex] = heightMap[(int)v].Colour;
-            // vertexColours[meshMapIndex] = new float4(0.3098039f, 0.3411765f, 0f,1f);
-            uv0[meshMapIndex] = heightMap[(int)v].upperLowerColours.c0.ToFloat3();
-            uv1[meshMapIndex] = heightMap[(int)v].upperLowerColours.c1.ToFloat3();
+            uv0[meshMapIndex] = new float4(math.lerp(float2.zero,new (1),math.unlerp(float2.zero,settings.mapDimentions,new(x,y))) ,heightMap[(int)v].slopeBlend);
+
+            uv1and2[meshMapIndex] = new()
+            {
+                c0 = heightMap[(int)v].upperLowerColours.c0.ToFloat3(),
+                c1= heightMap[(int)v].upperLowerColours.c1.ToFloat3()
+            };
             vertices[meshMapIndex] = pos;
             if (x != settings.mapDimentions.x - 1 && y != settings.mapDimentions.y - 1)
             {
@@ -432,19 +432,23 @@ public struct MeshGeneratorBVC : IJob
                 indicies[t + 5] = v;
             }
         }
-
+        // The advanced mesh api only allows 4 seperate data streams into the mesh
+        // for using more than 4 vertex attributes its neccescary to wrap certain properties into a single struct and combine the
+        // streams.
+        // Here I am combining uv1 and uv2 into a float3x2 (two float3s) and writing that into stream 2.
+        // a third colour component could be parsed in on stream 2 using a float3x3 which will be useful on the next shader.
         NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(4, Allocator.Temp);
         VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
-        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4, 1);
-        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 3, 2);
-        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 3, 3);
+        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 4, 1);        
+        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 3, 2);
+        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 3, 2);
         Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
         mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
         mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
         mesh.GetVertexData<float3>(0).CopyFrom(vertices);
-        mesh.GetVertexData<float4>(1).CopyFrom(vertexColours);
-        mesh.GetVertexData<float3>(2).CopyFrom(uv0);
-        mesh.GetVertexData<float3>(3).CopyFrom(uv1);
+        mesh.GetVertexData<float4>(1).CopyFrom(uv0);
+        mesh.GetVertexData<float3x2>(2).CopyFrom(uv1and2);
+        // mesh.GetVertexData<float3>(3).CopyFrom(uv1);
         mesh.GetIndexData<uint>().CopyFrom(indicies);
         mesh.subMeshCount = 1;
         mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));
