@@ -230,6 +230,7 @@ public struct HeightMapClamper : IJobParallelFor
         {
             float colourWeight = math.clamp(minValue - element.Value, 0.0f, 1.0f);
             element.Colour.x = colourWeight;
+            element.slopeBlend.y = 0f;
             element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, (Vector4)floorColour, colourWeight);
             // element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, colourWeight);
         }
@@ -310,8 +311,7 @@ public struct FillTexture : IJobParallelFor
 public struct HeightMapLayerer : IJobParallelFor
 {
     public RelativeNoiseData baseRelative;
-     public RelativeNoiseData heightMapRelative;
-    // public RelativeNoiseData relative2;
+    public RelativeNoiseData heightMapRelative;
 
     [ReadOnly]
     public NativeArray<HeightMapElement> baseMap;
@@ -395,6 +395,6 @@ public struct HeightMapLayerer : IJobParallelFor
         HeightMapElement element = result[index];
         element.Value = mask;
         result[index] = element;
-        //result[index] = math.lerp(result[index], hm* mask, hmWeight);
+        // result[index] = math.lerp(result[index], hm* mask, hmWeight);
     }
 }
