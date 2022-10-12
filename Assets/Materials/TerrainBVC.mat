@@ -186,7 +186,7 @@ Material:
     - _NormalMapSpace: 0
     - _NormalScale: 1
     - _OpaqueCullMode: 2
-    - _OverrideColours: 1
+    - _OverrideColours: 0
     - _OverrideMesh: 0
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
