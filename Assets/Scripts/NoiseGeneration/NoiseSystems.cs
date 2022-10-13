@@ -76,6 +76,13 @@ public struct HeightMapElement : IBufferElementData
     public float4 Colour;
     public float2 slopeBlend;
     public float4x2 upperLowerColours;
+    public float4 RimColour;
+
+    public float flatMaxHeight;
+    public float heightFade;
+    public float rimPower;
+    public float rimFac;
+    public float absMaxHeight;
 }
 
 // Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence

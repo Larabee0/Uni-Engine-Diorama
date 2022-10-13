@@ -454,3 +454,80 @@ public struct MeshGeneratorBVC : IJob
         mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));
     }
 }
+
+[BurstCompile]
+public struct MeshGeneratorABVC : IJob
+{
+    public RelativeNoiseData relativeHeightMapData;
+    [ReadOnly]
+    public MeshAreaSettings meshSettings;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> heightMap;
+
+    public int meshIndex;
+
+    public Mesh.MeshDataArray meshDataArray;
+
+    public void Execute()
+    {
+        int internalMeshIndex = meshIndex;
+        MeshAreaSettings settings = meshSettings;
+        int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
+
+        NativeArray<float3> vertices = new(settings.mapDimentions.x * settings.mapDimentions.y, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float3> vertexColours = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float4x4> uvs = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+        for (uint v = 0; v < vertices.Length; v++)
+        {
+            uint x = v % (uint)settings.mapDimentions.x;
+            uint y = v / (uint)settings.mapDimentions.x;
+            int meshMapIndex = (int)y * settings.mapDimentions.x + (int)x;
+
+            HeightMapElement mapElement = heightMap[(int)v];
+
+            vertexColours[meshMapIndex] = new(mapElement.rimPower, mapElement.rimFac, mapElement.absMaxHeight);
+
+            uvs[meshMapIndex] = new()
+            {
+                c0 = new float4(mapElement.flatMaxHeight,mapElement.heightFade, mapElement.slopeBlend),
+                c1 = mapElement.upperLowerColours.c0,
+                c2 =  mapElement.upperLowerColours.c1,
+                c3 = mapElement.RimColour
+            };
+
+            vertices[meshMapIndex] = new float3(x, mapElement.Value, y);
+
+            if (x != settings.mapDimentions.x - 1 && y != settings.mapDimentions.y - 1)
+            {
+                int t = ((int)y * (settings.mapDimentions.x - 1) + (int)x) * 3 * 2;
+
+                indicies[t + 0] = v + (uint)settings.mapDimentions.x;
+                indicies[t + 1] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 2] = v;
+
+                indicies[t + 3] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 4] = v + 1;
+                indicies[t + 5] = v;
+            }
+        }
+
+        NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(6, Allocator.Temp);
+        VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 4, 1);
+        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4, 1);
+        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4, 1);
+        VertexDescriptors[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4, 1);
+        VertexDescriptors[5] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3, 2);
+        Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
+        mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
+        mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
+        mesh.GetVertexData<float3>(0).CopyFrom(vertices);
+        mesh.GetVertexData<float4x4>(1).CopyFrom(uvs);
+        mesh.GetVertexData<float3>(2).CopyFrom(vertexColours);
+        mesh.GetIndexData<uint>().CopyFrom(indicies);
+        mesh.subMeshCount = 1;
+        mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));
+    }
+}
