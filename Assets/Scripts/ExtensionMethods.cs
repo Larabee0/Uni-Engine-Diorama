@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public static class ExtensionMethods
+public static class CustomExtensionMethods
 {
     public static float3 ToFloat3(this float4 input)
     {
