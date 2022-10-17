@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
-using System;
 
 /// <summary>
 /// IConvertGameObjectToEntity gets called when a gameobject converts into an entity
@@ -20,19 +16,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [SerializeField] private SimpleNoise[] simpleLayers;
-    [Space(200f)]
-    [SerializeField] private RigidNoise rigidNoise;
+    [Space(200f)] // work around for editor bug in 2021.3.4 were first item in an array does not get any space to display
 
-    [SerializeField] private RelativeNoiseData relativeNoiseData1;
-    [SerializeField] private RelativeNoiseData relativeNoiseData2;
-
-    [SerializeField] private FilterMode textureFilterMode;
-    [SerializeField] private FirstLayer singleLayer;
     [SerializeField] private bool UpdateOnChange;
 
     private Mesh activeMesh;
-    private Material meshMat;
-    private Texture2D texture;
 
     private void Awake()
     {
@@ -50,17 +38,19 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
     public void Generate()
     {
+        float start = Time.realtimeSinceStartup;
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
 
-        NoiseGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
+        TerrainGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
 
         baseMap.Dispose();
         GenerateHeightMapMesh(result);
+        Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
     }
 
     /// <summary>
-    /// Generates heightMap from given nativearray, disposes of array when finished.
+    /// Generates a height map mesh from given NativeArray, disposes of array when finished.
     /// </summary>
     /// <param name="heightMap">Height map to produce mesh of</param>
     public void GenerateHeightMapMesh(NativeArray<HeightMapElement> heightMap)
@@ -77,7 +67,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         var generator = new MeshGeneratorBVC
         {
-            relativeHeightMapData = NoiseGenerator.CalculateRelativeNoiseData(mapSettings,heightMap),
+            relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings,heightMap),
             meshSettings = mapSettings,
             meshIndex = 0,
             meshDataArray = meshDataArray,

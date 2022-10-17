@@ -20,8 +20,16 @@ public struct HeightMapWrapper
     }
 }
 
-public static class NoiseGenerator
+/// <summary>
+/// Static class provides access to height map jobs via static methods.
+/// </summary>
+public static class TerrainGenerator
 {
+    /// <summary>
+    /// Generates and layers height maps for all simple layers given
+    /// </summary>
+    /// <param name="simpleLayers">Height map layers</param>
+    /// <param name="heightMaps">Height map working NativeArrays</param>
     public static void GenerateSimpleMaps(SimpleNoise[] simpleLayers, HeightMapWrapper heightMaps)
     {
         for (int i = 0; i < simpleLayers.Length; i++)
@@ -51,7 +59,7 @@ public static class NoiseGenerator
     }
 
     /// <summary>
-    /// Generates a height map using the give noise settings and instance map settings
+    /// Generates a height map using the give simple noise settings and main map settings
     /// </summary>
     /// <param name="heightMap"> output array of height map </param>
     /// <param name="noiseSettings"> noise settings </param>
@@ -69,6 +77,12 @@ public static class NoiseGenerator
         ColourHeightMap(mapSettings,heightMap, noiseSettings);
     }
 
+    /// <summary>
+    /// Sets the colour of a height map layer after it has been generated base of the relative noise data and colour valus in the noiseSettings
+    /// </summary>
+    /// <param name="mapSettings">Main map settings</param>
+    /// <param name="heightMap">Height map layer to colour</param>
+    /// <param name="noiseSettings">layer settings</param>
     public static void ColourHeightMap(MeshAreaSettings mapSettings, NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings)
     {
         var colouringJob = new HeightMapPainter
@@ -81,17 +95,16 @@ public static class NoiseGenerator
     }
 
     /// <summary>
-    /// calculates the lowest, heighest and absolute mid point of a given height map
+    /// Calculates the lowest, heighest and absolute mid point of a given height map,
     /// </summary>
+    /// <param name="mapSettings">Main map settings </param>
     /// <param name="heightMap"> height map to process</param>
     /// <returns> relative noise data </returns>
     public static RelativeNoiseData CalculateRelativeNoiseData(MeshAreaSettings mapSettings,NativeArray<HeightMapElement> heightMap)
     {
         // get the lowest and highest point on the map
-        // we can use a 0-1 value to determine the flat floor of the map using this.
+        // we can use a 0-1 value to set the floor of the map using this.
 
-        // I wish to keep the mid point at the same relative position for all maps,
-        // to avoid having to move the whole map up and down.
         NativeReference<RelativeNoiseData> relativeData = new(Allocator.TempJob, NativeArrayOptions.ClearMemory);
         var heightMapMinMaxer = new HeightMapMinMaxCal
         {
@@ -107,9 +120,12 @@ public static class NoiseGenerator
     }
 
     /// <summary>
-    /// Clamps the height maps min value by the given flatFloor percetange
+    /// Clamps the lower height map to be at a certain % up the range of the height map
+    /// these points are coloured using the floor colour value (for water)
     /// </summary>
-    /// <param name="heightMap"></param>
+    /// <param name="heightMap">Height map to clamp </param>
+    /// <param name="mapSettings">Main map settings</param>
+    /// <param name="noiseSettings">Height map noise settings</param>
     public static void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, SimpleNoise noiseSettings)
     {
         RelativeNoiseData data = CalculateRelativeNoiseData(mapSettings, heightMap);
@@ -125,6 +141,13 @@ public static class NoiseGenerator
         heightMapClamper.Schedule(heightMap.Length, 64).Complete();
     }
 
+    /// <summary>
+    /// Layers two simple height maps together, blending colours and transition.
+    /// </summary>
+    /// <param name="mapSettings">Main map settings</param>
+    /// <param name="baseMap">Current main height map</param>
+    /// <param name="newMap">New layer to be merged onto main</param>
+    /// <param name="result">Resultant height map wrapper</param>
     private static void LayerTwoHeightMaps(MeshAreaSettings mapSettings,SimpleHeightMapWrapper baseMap, SimpleHeightMapWrapper newMap, SimpleHeightMapWrapper result)
     {
 

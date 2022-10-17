@@ -48,9 +48,6 @@ public struct HeightMapElement : IBufferElementData
     public float absMaxHeight;
 }
 
-// Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
-// adapted for 2D height map generation and C# Jobs by myself
-
 [Serializable]
 public struct SimpleNoise : IComponentData
 {
