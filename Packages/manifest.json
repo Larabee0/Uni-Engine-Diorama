@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.unity.burst": "1.7.4",
+    "com.unity.burst": "1.8.1",
     "com.unity.cinemachine": "2.8.9",
     "com.unity.collections": "1.2.4",
     "com.unity.entities": "0.51.1-preview.21",
