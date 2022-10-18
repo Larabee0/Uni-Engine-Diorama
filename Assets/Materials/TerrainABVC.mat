@@ -205,10 +205,10 @@ Material:
     - _NormalMapSpace: 0
     - _NormalScale: 1
     - _OpaqueCullMode: 2
-    - _Override_Flat_Colour: 1
-    - _Override_Main_Colour: 1
-    - _Override_Mesh_Data: 1
-    - _Override_Rim_Colour: 1
+    - _Override_Flat_Colour: 0
+    - _Override_Main_Colour: 0
+    - _Override_Mesh_Data: 0
+    - _Override_Rim_Colour: 0
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
     - _PPDMinSamples: 5
@@ -220,7 +220,7 @@ Material:
     - _RefractionModel: 0
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
-    - _Rim_Fac: 1
+    - _Rim_Fac: 0
     - _Rim_Power: 2.23
     - _Slope_Threshold: 0.32
     - _Smoothness: 0

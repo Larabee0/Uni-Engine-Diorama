@@ -85,13 +85,26 @@ public static class TerrainGenerator
     /// <param name="noiseSettings">layer settings</param>
     public static void ColourHeightMap(MeshAreaSettings mapSettings, NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings)
     {
-        var colouringJob = new HeightMapPainter
+        if (mapSettings.shader == ShaderPicker.BVC)
         {
-            noiseSettings = noiseSettings,
-            relativeNoiseData = CalculateRelativeNoiseData(mapSettings, heightMap),
-            HeightMap = heightMap
-        };
-        colouringJob.Schedule(heightMap.Length, 64).Complete();
+            var colouringJob = new HeightMapPainterBVC
+            {
+                noiseSettings = noiseSettings,
+                relativeNoiseData = CalculateRelativeNoiseData(mapSettings, heightMap),
+                HeightMap = heightMap
+            };
+            colouringJob.Schedule(heightMap.Length, 64).Complete();
+        }
+        else if (mapSettings.shader == ShaderPicker.ABVC)
+        {
+            var colouringJob = new HeightMapPainterABVC
+            {
+                noiseSettings = noiseSettings,
+                relativeNoiseData = CalculateRelativeNoiseData(mapSettings, heightMap),
+                HeightMap = heightMap
+            };
+            colouringJob.Schedule(heightMap.Length, 64).Complete();
+        }
     }
 
     /// <summary>
@@ -133,6 +146,7 @@ public static class TerrainGenerator
         data.minValue = noiseSettings.minValue;
         var heightMapClamper = new HeightMapClamper
         {
+            mapSettings = mapSettings,
             floorColour = mapSettings.floorColour,
             relativeNoiseData = data,
             HeightMap = heightMap
@@ -156,6 +170,7 @@ public static class TerrainGenerator
         newMap.noiseData.minValue = newMap.simpleNoise.riseUp;
         var layerer = new HeightMapLayerer
         {
+            mapSettings = mapSettings,
             baseRelative = baseMap.noiseData,
             heightMapRelative = newMap.noiseData,
             baseMap = baseMap.heightMap,

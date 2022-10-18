@@ -1,4 +1,3 @@
-
 using System;
 using Unity.Collections;
 using Unity.Entities;
@@ -9,6 +8,12 @@ public enum FirstLayer
 {
     Simple,
     Rigid
+}
+
+public enum ShaderPicker
+{
+    BVC,
+    ABVC
 }
 
 public struct SimpleHeightMapWrapper
@@ -72,14 +77,42 @@ public struct SimpleNoise : IComponentData
     [Range(-1f, 1f)]
     public float riseUp;
 
+    public BVC bvcSettings;
+    public ABVC abvcSettings;
+}
+
+[Serializable]
+public struct BVC
+{
+    public Color lower;
+    public Color upper;
+
+    [Range(0f, 1f)]
+    public float slopeThreshold;
+    [Range(0f, 1f)]
+    public float blendAmount;
+}
+
+[Serializable]
+public struct ABVC
+{
+    public Color flatColour;
+    public Color mainColour;
+    public Color rimColour;
+
     [Range(0f, 1f)]
     public float slopeThreshold;
     [Range(0f, 1f)]
     public float blendAmount;
 
-    public Color lower;
-    public Color upper;
+    public float flatMaxHeight;
+    public float heightFade;
+    public float rimPower;
+    [Range(0f, 1f)]
+    public float rimFacraction;
+    public float absolutelMaxHeight;
 }
+
 
 [Serializable]
 public struct RigidNoise : IComponentData

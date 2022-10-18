@@ -274,17 +274,17 @@ public struct MeshGeneratorABVC : IJob
 
         NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(6, Allocator.Temp);
         VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
-        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 4, 1);
-        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4, 1);
-        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4, 1);
-        VertexDescriptors[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4, 1);
-        VertexDescriptors[5] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3, 2);
+        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3, 1);
+        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 4, 2);
+        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4, 2);
+        VertexDescriptors[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4, 2);
+        VertexDescriptors[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4, 2);
         Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
         mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
         mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
         mesh.GetVertexData<float3>(0).CopyFrom(vertices);
-        mesh.GetVertexData<float4x4>(1).CopyFrom(uvs);
-        mesh.GetVertexData<float3>(2).CopyFrom(vertexColours);
+        mesh.GetVertexData<float3>(1).CopyFrom(vertexColours);
+        mesh.GetVertexData<float4x4>(2).CopyFrom(uvs);
         mesh.GetIndexData<uint>().CopyFrom(indicies);
         mesh.subMeshCount = 1;
         mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));

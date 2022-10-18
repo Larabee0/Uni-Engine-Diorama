@@ -12,7 +12,7 @@ public static class CustomExtensionMethods
 
     public static float4 ToFloat4(this Color input)
     {
-        return new float4(input.r, input.b, input.g, input.a);
+        return new float4(input.r, input.g, input.b, input.a);
     }
 
     public static Color ToColor(this float4 input)

@@ -13,6 +13,7 @@ using Unity.Mathematics;
 [BurstCompile]
 public struct HeightMapLayerer : IJobParallelFor
 {
+    public MeshAreaSettings mapSettings;
     public RelativeNoiseData baseRelative;
     public RelativeNoiseData heightMapRelative;
 
@@ -38,10 +39,26 @@ public struct HeightMapLayerer : IJobParallelFor
         if (element.Value < mask)
         {
             float extraWeight = math.clamp(mask - element.Value, 0.0f, 1.0f);
-            element.Colour = math.lerp(element.Colour, heightMap[index].Colour, extraWeight);
-            element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
-            element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
-            element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
+            if (mapSettings.shader == ShaderPicker.BVC)
+            {
+                element.Colour = math.lerp(element.Colour, heightMap[index].Colour, extraWeight);
+                element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
+                element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
+                element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
+            }
+            else if (mapSettings.shader == ShaderPicker.ABVC)
+            {
+                element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
+
+                element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
+                element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
+                element.RimColour = math.lerp(element.RimColour, heightMap[index].RimColour, extraWeight);
+                element.flatMaxHeight = math.lerp(element.flatMaxHeight, heightMap[index].flatMaxHeight, extraWeight);
+                element.heightFade = math.lerp(element.heightFade, heightMap[index].heightFade, extraWeight);
+                element.rimPower = math.lerp(element.rimPower, heightMap[index].rimPower, extraWeight);
+                element.rimFac = math.lerp(element.rimFac, heightMap[index].rimFac, extraWeight);
+                element.absMaxHeight = math.lerp(element.absMaxHeight, heightMap[index].absMaxHeight, extraWeight);
+            }
         }
         element.Value = math.max(element.Value, mask);
 

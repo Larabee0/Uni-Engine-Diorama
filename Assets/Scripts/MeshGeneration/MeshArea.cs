@@ -13,14 +13,17 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 {
     [SerializeField] private MeshFilter meshFilter;
     [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private Material bvcMat;
+    [SerializeField] private Material abvcMat;
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [SerializeField] private SimpleNoise[] simpleLayers;
-    [Space(200f)] // work around for editor bug in 2021.3.4 were first item in an array does not get any space to display
+    [Space(400f)] // work around for editor bug in 2021.3.4 were first item in an array does not get any space to display
 
     [SerializeField] private bool UpdateOnChange;
 
     private Mesh activeMesh;
+    
 
     private void Awake()
     {
@@ -65,16 +68,33 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         }
 
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
-        var generator = new MeshGeneratorBVC
+        if (mapSettings.shader == ShaderPicker.BVC)
         {
-            relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings,heightMap),
-            meshSettings = mapSettings,
-            meshIndex = 0,
-            meshDataArray = meshDataArray,
-            heightMap = heightMap
-        };
+            meshRenderer.sharedMaterial = bvcMat;
+            var generator = new MeshGeneratorBVC
+            {
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                meshSettings = mapSettings,
+                meshIndex = 0,
+                meshDataArray = meshDataArray,
+                heightMap = heightMap
+            };
+            generator.Schedule().Complete();
+        }
+        else if(mapSettings.shader == ShaderPicker.ABVC)
+        {
+            meshRenderer.sharedMaterial = abvcMat;
+            var generator = new MeshGeneratorABVC
+            {
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                meshSettings = mapSettings,
+                meshIndex = 0,
+                meshDataArray = meshDataArray,
+                heightMap = heightMap
+            };
+            generator.Schedule().Complete();
+        }
 
-        generator.Schedule().Complete();
         heightMap.Dispose();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, activeMesh);
         activeMesh.RecalculateBounds();
