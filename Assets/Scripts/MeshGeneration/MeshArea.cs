@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 
 /// <summary>
 /// IConvertGameObjectToEntity gets called when a gameobject converts into an entity
@@ -15,6 +16,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Material bvcMat;
     [SerializeField] private Material abvcMat;
+    [SerializeField] private Material abvcTexturedMat;
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [SerializeField] private SimpleNoise[] simpleLayers;
@@ -98,6 +100,36 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 heightMap = heightMap
             };
             generator.Schedule().Complete();
+        }
+        else if(mapSettings.shader == ShaderPicker.ABVCTextured)
+        {
+            NativeArray<float4> rawDataForTexture = new(heightMap.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            var generator = new MeshGeneratorABVCT
+            {
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                meshSettings = mapSettings,
+                meshIndex = 0,
+                meshDataArray = meshDataArray,
+                textureData = rawDataForTexture,
+                heightMap = heightMap
+            };
+            generator.Schedule().Complete();
+
+            Texture2D dataTexture = new(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false, true)
+            {
+                filterMode = FilterMode.Trilinear,
+            };
+            var textureFiller = new FillTexture
+            {
+                source = rawDataForTexture,
+                Destination = dataTexture.GetPixelData<Color32>(0)
+            };
+            textureFiller.Schedule(rawDataForTexture.Length, 64).Complete();
+            rawDataForTexture.Dispose();
+            dataTexture.Apply();
+            abvcTexturedMat.SetTexture("_Genereated_Data", dataTexture);
+            abvcTexturedMat.SetVector("_TextureTiling", new Vector4(mapSettings.textureTiling.x, mapSettings.textureTiling.y));
+            meshRenderer.sharedMaterial = abvcTexturedMat;
         }
 
         heightMap.Dispose();

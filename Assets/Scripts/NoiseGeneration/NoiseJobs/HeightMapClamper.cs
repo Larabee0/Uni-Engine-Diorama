@@ -34,7 +34,7 @@ public struct HeightMapClamper : IJobParallelFor
                 element.slopeBlend.y = 0f;
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);
             }
-            else if(mapSettings.shader == ShaderPicker.ABVC)
+            else if(mapSettings.shader == ShaderPicker.ABVC||mapSettings.shader == ShaderPicker.ABVCTextured)
             {
                 element.slopeBlend.y = 0f;
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);

@@ -19,8 +19,9 @@ public class MeshAreaRef : IComponentData { public Mesh Value; }
 [Serializable]
 public struct MeshAreaSettings : IComponentData
 {
-    public ShaderPicker shader;
     public int2 mapDimentions;
+    public ShaderPicker shader;
+    public int2 textureTiling;
     [Range(0f, 1f)]
     public float floorPercentage;
     public Color32 floorColour;

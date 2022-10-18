@@ -344,7 +344,11 @@ public struct MeshGeneratorABVCT : IJob
 
             vertexColours[meshMapIndex] = new(mapElement.rimPower, mapElement.rimFac, mapElement.absMaxHeight);
             textureData[meshMapIndex] = new float4(mapElement.flatMaxHeight, mapElement.heightFade, mapElement.slopeBlend);
-            textureUVs[meshMapIndex] = new float2(math.unlerp(0, settings.mapDimentions.x-1, x), math.unlerp(0,settings.mapDimentions.y,y));
+            textureUVs[meshMapIndex] = new()
+            {
+                x = math.unlerp(0, settings.mapDimentions.x -1, x ),
+                y = math.unlerp(0, settings.mapDimentions.y -1, y )
+            };
             colourUVs[meshMapIndex] = new()
             {
                 c0 = mapElement.upperLowerColours.c0,

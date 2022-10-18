@@ -95,7 +95,7 @@ public static class TerrainGenerator
             };
             colouringJob.Schedule(heightMap.Length, 64).Complete();
         }
-        else if (mapSettings.shader == ShaderPicker.ABVC)
+        else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
         {
             var colouringJob = new HeightMapPainterABVC
             {

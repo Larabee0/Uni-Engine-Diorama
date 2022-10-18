@@ -46,7 +46,7 @@ public struct HeightMapLayerer : IJobParallelFor
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
                 element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
             }
-            else if (mapSettings.shader == ShaderPicker.ABVC)
+            else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
             {
                 element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
 

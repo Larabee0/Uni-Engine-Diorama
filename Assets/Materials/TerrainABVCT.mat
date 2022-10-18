@@ -23,8 +23,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TerrainABVC
-  m_Shader: {fileID: -6465566751694194690, guid: aa654f12d47fccb40a1c117b4daabe81, type: 3}
+  m_Name: TerrainABVCT
+  m_Shader: {fileID: -6465566751694194690, guid: c058a0f911a766c468980083628e6363, type: 3}
   m_ValidKeywords:
   - _DISABLE_SSR_TRANSPARENT
   m_InvalidKeywords:
@@ -105,7 +105,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Pattern:
-        m_Texture: {fileID: 2800000, guid: 0fd2da29303ebcb4cb50ad1cccf7f097, type: 3}
+        m_Texture: {fileID: 2800000, guid: 935434c281cfe0a41be87c3dca13ac29, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularColorMap:
@@ -286,6 +286,7 @@ Material:
     - _Main_Colour: {r: 0.14901957, g: 0.09803919, b: 0.043137237, a: 1}
     - _Rim_Colour: {r: 0.8313726, g: 0.4705882, b: 0.07450979, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TextureTiling: {r: 100, g: 100, b: 0, a: 0}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _TransmittanceColor: {r: 1, g: 1, b: 1, a: 1}
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
