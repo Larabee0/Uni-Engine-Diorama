@@ -13,7 +13,8 @@ public enum FirstLayer
 public enum ShaderPicker
 {
     BVC,
-    ABVC
+    ABVC,
+    ABVCTextured
 }
 
 public struct SimpleHeightMapWrapper

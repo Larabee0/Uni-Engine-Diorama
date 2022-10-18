@@ -214,6 +214,21 @@ public struct MeshGeneratorBVC : IJob
     }
 }
 
+/// <summary>
+/// This job reaches the limit of what can reasonably be stored in the mesh data.
+/// I wish to actually use terrain textures for grass/rock/mud instead of flat colours which involves having UV coordinates
+/// for sampling the texture, currently all 4 uv channels I have access to in shader graph contain colours or
+/// other data for the shader.
+/// To solve this we need to move something out of the uv so we can fit float2 uv coordinates in.
+/// Plan create and RGBA32 texture to store the uv0 setting values kept in that dimention.
+/// 
+/// We could probably move these into uv1,2 and 3 alpha channels and the unused channels in vertex colours,
+/// but I wish to have the option of using colour alpha in the future.
+/// 
+/// Then we can use the uv coordinates there to now sample the texture for the values and additionally
+/// sample terrain textures. we will have to add a blend value for blending between textures in the shader
+/// This will be calculated in the heightMap layerer and stored in the vertex colour alpha channel
+/// </summary>
 [BurstCompile]
 public struct MeshGeneratorABVC : IJob
 {
@@ -233,9 +248,9 @@ public struct MeshGeneratorABVC : IJob
         MeshAreaSettings settings = meshSettings;
         int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
 
-        NativeArray<float3> vertices = new(settings.mapDimentions.x * settings.mapDimentions.y, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        NativeArray<float3> vertexColours = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-        NativeArray<float4x4> uvs = new(vertices.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float3> vertices = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float3> vertexColours = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float4x4> uvs = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
         for (uint v = 0; v < vertices.Length; v++)
@@ -285,6 +300,88 @@ public struct MeshGeneratorABVC : IJob
         mesh.GetVertexData<float3>(0).CopyFrom(vertices);
         mesh.GetVertexData<float3>(1).CopyFrom(vertexColours);
         mesh.GetVertexData<float4x4>(2).CopyFrom(uvs);
+        mesh.GetIndexData<uint>().CopyFrom(indicies);
+        mesh.subMeshCount = 1;
+        mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));
+    }
+}
+
+[BurstCompile]
+public struct MeshGeneratorABVCT : IJob
+{
+    public RelativeNoiseData relativeHeightMapData;
+    [ReadOnly]
+    public MeshAreaSettings meshSettings;
+    [ReadOnly]
+    public NativeArray<HeightMapElement> heightMap;
+
+    [WriteOnly]
+    public NativeArray<float4> textureData;
+
+    public int meshIndex;
+
+    public Mesh.MeshDataArray meshDataArray;
+
+    public void Execute()
+    {
+        int internalMeshIndex = meshIndex;
+        MeshAreaSettings settings = meshSettings;
+        int indiciesCount = (settings.mapDimentions.x - 1) * (settings.mapDimentions.y - 1) * 6;
+
+        NativeArray<float3> vertices = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float3> vertexColours = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float2> textureUVs = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<float4x3> colourUVs = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+        NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+        for (uint v = 0; v < vertices.Length; v++)
+        {
+            uint x = v % (uint)settings.mapDimentions.x;
+            uint y = v / (uint)settings.mapDimentions.x;
+            int meshMapIndex = (int)y * settings.mapDimentions.x + (int)x;
+
+            HeightMapElement mapElement = heightMap[(int)v];
+
+            vertexColours[meshMapIndex] = new(mapElement.rimPower, mapElement.rimFac, mapElement.absMaxHeight);
+            textureData[meshMapIndex] = new float4(mapElement.flatMaxHeight, mapElement.heightFade, mapElement.slopeBlend);
+            textureUVs[meshMapIndex] = new float2(math.unlerp(0, settings.mapDimentions.x-1, x), math.unlerp(0,settings.mapDimentions.y,y));
+            colourUVs[meshMapIndex] = new()
+            {
+                c0 = mapElement.upperLowerColours.c0,
+                c1 = mapElement.upperLowerColours.c1,
+                c2 = mapElement.RimColour
+            };
+
+            vertices[meshMapIndex] = new float3(x, mapElement.Value, y);
+
+            if (x != settings.mapDimentions.x - 1 && y != settings.mapDimentions.y - 1)
+            {
+                int t = ((int)y * (settings.mapDimentions.x - 1) + (int)x) * 3 * 2;
+
+                indicies[t + 0] = v + (uint)settings.mapDimentions.x;
+                indicies[t + 1] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 2] = v;
+
+                indicies[t + 3] = v + (uint)settings.mapDimentions.x + 1;
+                indicies[t + 4] = v + 1;
+                indicies[t + 5] = v;
+            }
+        }
+
+        NativeArray<VertexAttributeDescriptor> VertexDescriptors = new(6, Allocator.Temp);
+        VertexDescriptors[0] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+        VertexDescriptors[1] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 3, 1);
+        VertexDescriptors[2] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 2);
+        VertexDescriptors[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4, 3);
+        VertexDescriptors[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4, 3);
+        VertexDescriptors[5] = new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4, 3);
+        Mesh.MeshData mesh = meshDataArray[internalMeshIndex];
+        mesh.SetVertexBufferParams(vertices.Length, VertexDescriptors);
+        mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
+        mesh.GetVertexData<float3>(0).CopyFrom(vertices);
+        mesh.GetVertexData<float3>(1).CopyFrom(vertexColours);
+        mesh.GetVertexData<float2>(2).CopyFrom(textureUVs);
+        mesh.GetVertexData<float4x3>(3).CopyFrom(colourUVs);
         mesh.GetIndexData<uint>().CopyFrom(indicies);
         mesh.subMeshCount = 1;
         mesh.SetSubMesh(0, new(0, indiciesCount, MeshTopology.Triangles));

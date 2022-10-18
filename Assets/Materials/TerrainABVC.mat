@@ -24,7 +24,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TerrainABVC
-  m_Shader: {fileID: -6465566751694194690, guid: aa654f12d47fccb40a1c117b4daabe81, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: c058a0f911a766c468980083628e6363, type: 3}
   m_ValidKeywords:
   - _DISABLE_SSR_TRANSPARENT
   m_InvalidKeywords:

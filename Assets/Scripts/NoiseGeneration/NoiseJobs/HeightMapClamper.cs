@@ -47,7 +47,6 @@ public struct HeightMapClamper : IJobParallelFor
         }
         element.Value = math.max(value, minValue) + zeroOffset;
 
-
         HeightMap[index] = element;
     }
 }

@@ -28,7 +28,12 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     private void Awake()
     {
         meshFilter=GetComponent<MeshFilter>();
-        meshFilter.mesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+        meshFilter.mesh = activeMesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+    }
+    private void Start()
+    {
+
+        Generate();
     }
 
     private void OnValidate()
