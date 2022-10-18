@@ -40,6 +40,9 @@ public struct HeightMapClamper : IJobParallelFor
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);
                 element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, floorColour.ToFloat4(), colourWeight);
                 element.RimColour = math.lerp(element.RimColour, floorColour.ToFloat4(), colourWeight);
+                // element.RimColour =  colourWeight;
+
+                element.rimFac = math.lerp(element.rimFac,0f,colourWeight) ;
 
                 // element.flatMaxHeight = math.lerp(element.flatMaxHeight, (Vector4)floorColour, colourWeight);
                 // element.heightFade = math.lerp(element.heightFade, (Vector4)floorColour, colourWeight);
