@@ -34,7 +34,7 @@ public struct HeightMapClamper : IJobParallelFor
                 element.slopeBlend.y = 0f;
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);
             }
-            else if(mapSettings.shader == ShaderPicker.ABVC||mapSettings.shader == ShaderPicker.ABVCTextured)
+            else if(mapSettings.shader == ShaderPicker.ABVC)
             {
                 element.slopeBlend.y = 0f;
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);
@@ -46,6 +46,17 @@ public struct HeightMapClamper : IJobParallelFor
 
                 // element.flatMaxHeight = math.lerp(element.flatMaxHeight, (Vector4)floorColour, colourWeight);
                 // element.heightFade = math.lerp(element.heightFade, (Vector4)floorColour, colourWeight);
+            }
+            else if(mapSettings.shader == ShaderPicker.ABVCTextured)
+            {
+                element.slopeBlend.y = 0f;
+                element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, floorColour.ToFloat4(), colourWeight);
+                element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, floorColour.ToFloat4(), colourWeight);
+                element.RimColour = math.lerp(element.RimColour, floorColour.ToFloat4(), colourWeight);
+                element.rimFac = math.lerp(element.rimFac, 0f, colourWeight);
+                element.secondaryTextureIndex = element.mainTextureIndex;
+                element.mainTextureIndex = 0;
+                element.secondaryBlendMul = 1f - colourWeight;
             }
         }
         element.Value = math.max(value, minValue) + zeroOffset;

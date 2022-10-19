@@ -17,7 +17,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private Material bvcMat;
     [SerializeField] private Material abvcMat;
     [SerializeField] private Material abvcTexturedMat;
+
+    [SerializeField] private Texture2D floorTexture;
+    [SerializeField] private Texture2D[] terrainTextures;
     [SerializeField] private MeshAreaSettings mapSettings;
+
 
     [SerializeField] private SimpleNoise[] simpleLayers;
     [Space(400f)] // work around for editor bug in 2021.3.4 were first item in an array does not get any space to display
@@ -129,6 +133,9 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             dataTexture.Apply();
             abvcTexturedMat.SetTexture("_Genereated_Data", dataTexture);
             abvcTexturedMat.SetVector("_TextureTiling", new Vector4(mapSettings.textureTiling.x, mapSettings.textureTiling.y));
+            abvcTexturedMat.SetTexture("_Patterns", TerrainGenerator.TextureBundler(floorTexture, terrainTextures));
+
+
             meshRenderer.sharedMaterial = abvcTexturedMat;
         }
 

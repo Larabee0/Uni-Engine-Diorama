@@ -47,6 +47,10 @@ public struct HeightMapElement : IBufferElementData
     public float4x2 upperLowerColours;
     public float4 RimColour;
 
+    public int mainTextureIndex;
+    public int secondaryTextureIndex;
+    public float secondaryBlendMul;
+
     public float flatMaxHeight;
     public float heightFade;
     public float rimPower;
@@ -100,6 +104,10 @@ public struct ABVC
     public Color flatColour;
     public Color mainColour;
     public Color rimColour;
+
+    [SerializeField] private int mainTextureIndex;
+    public int MainTextureIndex => mainTextureIndex+1;
+
 
     [Range(0f, 1f)]
     public float slopeThreshold;

@@ -46,7 +46,7 @@ public struct HeightMapLayerer : IJobParallelFor
                 element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
                 element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
             }
-            else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
+            else if (mapSettings.shader == ShaderPicker.ABVC )
             {
                 element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
 
@@ -58,6 +58,35 @@ public struct HeightMapLayerer : IJobParallelFor
                 element.rimPower = math.lerp(element.rimPower, heightMap[index].rimPower, extraWeight);
                 element.rimFac = math.lerp(element.rimFac, heightMap[index].rimFac, extraWeight);
                 element.absMaxHeight = math.lerp(element.absMaxHeight, heightMap[index].absMaxHeight, extraWeight);
+            }
+            else if ( mapSettings.shader == ShaderPicker.ABVCTextured)
+            {
+                element.slopeBlend = math.lerp(element.slopeBlend, heightMap[index].slopeBlend, extraWeight);
+
+                element.upperLowerColours.c0 = math.lerp(element.upperLowerColours.c0, heightMap[index].upperLowerColours.c0, extraWeight);
+                element.upperLowerColours.c1 = math.lerp(element.upperLowerColours.c1, heightMap[index].upperLowerColours.c1, extraWeight);
+                element.RimColour = math.lerp(element.RimColour, heightMap[index].RimColour, extraWeight);
+                element.flatMaxHeight = math.lerp(element.flatMaxHeight, heightMap[index].flatMaxHeight, extraWeight);
+                element.heightFade = math.lerp(element.heightFade, heightMap[index].heightFade, extraWeight);
+                element.rimPower = math.lerp(element.rimPower, heightMap[index].rimPower, extraWeight);
+                element.rimFac = math.lerp(element.rimFac, heightMap[index].rimFac, extraWeight);
+                element.absMaxHeight = math.lerp(element.absMaxHeight, heightMap[index].absMaxHeight, extraWeight);
+
+                if(extraWeight > 0.5f)
+                {
+                    element.secondaryTextureIndex = element.mainTextureIndex;
+                    element.mainTextureIndex = heightMap[index].mainTextureIndex;
+                    element.secondaryBlendMul = 1f-extraWeight;
+                }
+                else
+                {
+                    element.mainTextureIndex = element.secondaryTextureIndex;
+                    element.secondaryTextureIndex = heightMap[index].mainTextureIndex;
+                    element.secondaryBlendMul = extraWeight;
+                }
+                element.secondaryTextureIndex = element.mainTextureIndex;
+                element.mainTextureIndex = heightMap[index].mainTextureIndex;
+                element.secondaryBlendMul = 1f - extraWeight;
             }
         }
         element.Value = math.max(element.Value, mask);

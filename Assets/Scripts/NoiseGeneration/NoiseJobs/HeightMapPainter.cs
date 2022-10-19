@@ -47,6 +47,7 @@ public struct HeightMapPainterABVC : IJobParallelFor
         element.rimPower = noiseSettings.abvcSettings.rimPower;
         element.rimFac = noiseSettings.abvcSettings.rimFacraction;
         element.absMaxHeight = noiseSettings.abvcSettings.absolutelMaxHeight;
+        element.mainTextureIndex = noiseSettings.abvcSettings.MainTextureIndex;
 
         HeightMap[index] = element;
     }
