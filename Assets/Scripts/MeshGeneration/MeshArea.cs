@@ -22,9 +22,10 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private Texture2D[] terrainTextures;
     [SerializeField] private MeshAreaSettings mapSettings;
 
-
+    [Tooltip("First element in the simple layers list is overwritten by this property.\nThis is a work around for an editor bug when trying to edit the first element of a collection.")]
+    [SerializeField] private SimpleNoise firstSimpleLayer;
     [SerializeField] private SimpleNoise[] simpleLayers;
-    [Space(400f)] // work around for editor bug in 2021.3.4 were first item in an array does not get any space to display
+    // [Space(450)]
 
     [SerializeField] private bool UpdateOnChange;
 
@@ -38,7 +39,6 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     }
     private void Start()
     {
-
         Generate();
     }
 
@@ -55,12 +55,15 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         float start = Time.realtimeSinceStartup;
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
-
+        simpleLayers[0] = firstSimpleLayer;
         TerrainGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
 
         baseMap.Dispose();
-        GenerateHeightMapMesh(result);
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
+        start = Time.realtimeSinceStartup;
+        GenerateHeightMapMesh(result);
+        Debug.LogFormat("Total Mesh Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
+
     }
 
     /// <summary>
@@ -78,9 +81,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             activeMesh.Clear();
         }
 
+        float start;
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         if (mapSettings.shader == ShaderPicker.BVC)
         {
+            start = Time.realtimeSinceStartup;
             meshRenderer.sharedMaterial = bvcMat;
             var generator = new MeshGeneratorBVC
             {
@@ -91,9 +96,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 heightMap = heightMap
             };
             generator.Schedule().Complete();
+            Debug.LogFormat("MeshGeneratorBVC Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
         }
         else if(mapSettings.shader == ShaderPicker.ABVC)
         {
+            start = Time.realtimeSinceStartup;
             meshRenderer.sharedMaterial = abvcMat;
             var generator = new MeshGeneratorABVC
             {
@@ -104,9 +111,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 heightMap = heightMap
             };
             generator.Schedule().Complete();
+            Debug.LogFormat("MeshGeneratorABVC Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
         }
         else if(mapSettings.shader == ShaderPicker.ABVCTextured)
         {
+            start = Time.realtimeSinceStartup;
             NativeArray<float4> rawDataForTexture = new(heightMap.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             var generator = new MeshGeneratorABVCT
             {
@@ -118,6 +127,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 heightMap = heightMap
             };
             generator.Schedule().Complete();
+            Debug.LogFormat("MeshGeneratorABVCT Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
             Texture2D dataTexture = new(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false, true)
             {
@@ -133,8 +143,10 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             dataTexture.Apply();
             abvcTexturedMat.SetTexture("_Genereated_Data", dataTexture);
             abvcTexturedMat.SetVector("_TextureTiling", new Vector4(mapSettings.textureTiling.x, mapSettings.textureTiling.y));
-            abvcTexturedMat.SetTexture("_Patterns", TerrainGenerator.TextureBundler(floorTexture, terrainTextures));
 
+            start = Time.realtimeSinceStartup;
+            abvcTexturedMat.SetTexture("_Patterns", TerrainGenerator.TextureBundler(floorTexture, terrainTextures));
+            Debug.LogFormat("Texture Array Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
             meshRenderer.sharedMaterial = abvcTexturedMat;
         }

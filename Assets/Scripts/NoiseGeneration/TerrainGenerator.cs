@@ -189,7 +189,6 @@ public static class TerrainGenerator
             wrapMode = floor.wrapMode
         };
 
-
         for (int m = 0; m < floor.mipmapCount; m++)
         {
             Graphics.CopyTexture(floor, 0, m, textureArray, 0, m);

@@ -330,7 +330,6 @@ public struct MeshGeneratorABVCT : IJob
 
         NativeArray<float3> vertices = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<float4> vertexColours = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-//         NativeArray<float2> textureUVs = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<float4x4> UVs = new(heightMap.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
         NativeArray<uint> indicies = new(indiciesCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
@@ -385,7 +384,6 @@ public struct MeshGeneratorABVCT : IJob
         mesh.SetIndexBufferParams(indiciesCount, IndexFormat.UInt32);
         mesh.GetVertexData<float3>(0).CopyFrom(vertices);
         mesh.GetVertexData<float4>(1).CopyFrom(vertexColours);
-        // mesh.GetVertexData<float2>(2).CopyFrom(textureUVs);
         mesh.GetVertexData<float4x4>(2).CopyFrom(UVs);
         mesh.GetIndexData<uint>().CopyFrom(indicies);
         mesh.subMeshCount = 1;
