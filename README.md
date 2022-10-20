@@ -5,6 +5,8 @@ I intend to create a terrain landscape generator using a hydraulic erosion algor
 The minimum viable product I wish to create is single displayed area which the user can modify using in fascinator UI. The generation should not freeze the fascinator but does not need to generate instantly.
 The user should also be able to fly around the area.
 The terrain will use a custom shader to provide colour to it at different heights.
+
+![19thOctober](https://media.github.falmouth.ac.uk/user/1458/files/2aa78b2e-729a-47ee-afe3-e5cf11b09c94)
 ### Main Task Breakdown
 -	Create a height map terrain generator using an algorithm or number of algorithms from the internet.
 -	Create in game UI to change the generation settings
@@ -26,7 +28,8 @@ The user can choose to select one of the cabinets, freezing the transitioning in
 -	Full map instancing (the shader and material must only use data from the mesh to determine colour, no global data set from a script)
 -	Increased optimisation to allow the random generation to be seamless
 ## Goal 2
-Add map detailing (trees, bushes, flowers, grass)
+Add map detailing
+ (trees, bushes, flowers, grass)
 ### Breakdown
 -	Height map generator must produce information about where to place map details depending on height and information from the erosion system.
 ## Goal 3
