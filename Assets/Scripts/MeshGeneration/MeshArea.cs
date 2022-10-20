@@ -145,7 +145,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             abvcTexturedMat.SetVector("_TextureTiling", new Vector4(mapSettings.textureTiling.x, mapSettings.textureTiling.y));
 
             start = Time.realtimeSinceStartup;
-            abvcTexturedMat.SetTexture("_Patterns", TerrainGenerator.TextureBundler(floorTexture, terrainTextures));
+            abvcTexturedMat.SetTexture("_Patterns", TextureArrayGenerator.BasicBundler(floorTexture, terrainTextures));
             Debug.LogFormat("Texture Array Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
             meshRenderer.sharedMaterial = abvcTexturedMat;

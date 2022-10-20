@@ -179,29 +179,4 @@ public static class TerrainGenerator
         };
         layerer.Schedule(result.heightMap.Length, 64).Complete();
     }
-
-    public static Texture2DArray TextureBundler(Texture2D floor, Texture2D[] terrainTextures)
-    {
-        Texture2DArray textureArray = new(floor.width, floor.height, terrainTextures.Length + 1, floor.format, floor.mipmapCount > 1)
-        {
-            anisoLevel = floor.anisoLevel,
-            filterMode = floor.filterMode,
-            wrapMode = floor.wrapMode
-        };
-
-        for (int m = 0; m < floor.mipmapCount; m++)
-        {
-            Graphics.CopyTexture(floor, 0, m, textureArray, 0, m);
-        }
-        
-        for (int i = 0; i < terrainTextures.Length; i++)
-        {
-            for (int m = 0; m < floor.mipmapCount; m++)
-            {
-                Graphics.CopyTexture(terrainTextures[i], 0, m, textureArray, i + 1, m);
-            }
-        }
-
-        return textureArray;
-    }
 }

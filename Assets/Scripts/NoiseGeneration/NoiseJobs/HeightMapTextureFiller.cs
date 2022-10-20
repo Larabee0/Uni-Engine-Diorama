@@ -16,3 +16,16 @@ public struct FillTexture : IJobParallelFor
         Destination[i] = source[i].ToColor();
     }
 }
+
+[BurstCompile]
+public struct FillTextureColor32 : IJobParallelFor
+{
+    [ReadOnly]
+    public NativeArray<Color32> source;
+    [WriteOnly]
+    public NativeArray<Color32> destination;
+    public void Execute(int i)
+    {
+        destination[i] = source[i];
+    }
+}
