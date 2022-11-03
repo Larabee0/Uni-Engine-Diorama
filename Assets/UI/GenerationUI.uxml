@@ -1,0 +1,86 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/ProjectStyleSheet.uss?fileID=7433441132597879392&amp;guid=79da2213dfa5be64b9ba9dec08556538&amp;type=3#ProjectStyleSheet" />
+    <ui:VisualElement>
+        <ui:VisualElement name="BasicSettings" style="align-items: stretch; flex-direction: column; width: 300px; background-color: rgb(56, 56, 56); border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: none;">
+            <ui:VisualElement>
+                <ui:Label text="Main Terrain Settings" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold; font-size: 14px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="Dimentions" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                    <ui:Label text="Terrain Dimentions" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="TextureScale" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                    <ui:Label text="Texture Scale" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FloorLevel" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgba(128, 128, 128, 255); border-right-color: rgba(128, 128, 128, 255); border-top-color: rgba(128, 128, 128, 255); border-bottom-color: rgba(128, 128, 128, 255); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-width: 1px; border-bottom-color: rgba(128, 128, 128, 255);">
+                    <ui:Label text="Floor Fraction" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Floor" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:Slider picking-mode="Ignore" value="0.348" high-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="BasicLayerSettings" style="align-items: stretch; flex-direction: column; width: 300px; background-color: rgb(56, 56, 56); border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+            <ui:VisualElement>
+                <ui:Label text="Basic Terrain Layer" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold; font-size: 14px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="Dimentions" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                    <ui:Label text="Terrain Dimentions" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="TextureScale" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                    <ui:Label text="Texture Scale" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FloorLevel" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:VisualElement style="border-bottom-width: 1px; border-bottom-color: rgb(128, 128, 128);">
+                    <ui:Label text="Floor Fraction" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                    <ui:Label text="Floor" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                    <ui:Slider picking-mode="Ignore" value="0.348" high-value="1" show-input-field="true" style="width: 200px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement />
+</ui:UXML>
