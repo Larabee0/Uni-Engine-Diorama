@@ -13,8 +13,8 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
     public NativeArray<HeightMapElement> heightMap;
     public void Execute(int index)
     {
-        float x = (float)index % areaSettings.mapDimentions.x;
-        float y = (float)index / areaSettings.mapDimentions.x;
+        float x = ((float)index % areaSettings.mapDimentions.x)-areaSettings.mapDimentions.x/2;
+        float y = ((float)index / areaSettings.mapDimentions.x)-areaSettings.mapDimentions.y/2;
 
         float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
         HeightMapElement element = heightMap[index];

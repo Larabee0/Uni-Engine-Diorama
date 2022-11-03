@@ -18,8 +18,10 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private Material abvcMat;
     [SerializeField] private Material abvcTexturedMat;
 
+    [SerializeField] private int textureHash;
     [SerializeField] private Texture2D floorTexture;
     [SerializeField] private Texture2D[] terrainTextures;
+    [SerializeField] private Texture2DArray bundledTextures;
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [Tooltip("First element in the simple layers list is overwritten by this property.\nThis is a work around for an editor bug when trying to edit the first element of a collection.")]
@@ -145,7 +147,14 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             abvcTexturedMat.SetVector("_TextureTiling", new Vector4(mapSettings.textureTiling.x, mapSettings.textureTiling.y));
 
             start = Time.realtimeSinceStartup;
-            abvcTexturedMat.SetTexture("_Patterns", TextureArrayGenerator.BasicBundler(floorTexture, terrainTextures));
+            int hash = TextureArrayGenerator.HashTextures(floorTexture, terrainTextures);
+            if (hash != textureHash || bundledTextures == null)
+            {
+                bundledTextures = TextureArrayGenerator.BasicBundler(floorTexture, terrainTextures);
+                textureHash = hash;
+                Debug.Log("bundled textures");
+            }
+            abvcTexturedMat.SetTexture("_Patterns", bundledTextures);
             Debug.LogFormat("Texture Array Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
             meshRenderer.sharedMaterial = abvcTexturedMat;

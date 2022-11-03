@@ -25,6 +25,16 @@ public static class TextureArrayGenerator
         return textureArray;
     }
 
+    public static int HashTextures(Texture2D floor, Texture2D[] terrainTextures)
+    {
+        int hash = floor.GetHashCode();
+        for (int i = 0; i < terrainTextures.Length; i++)
+        {
+            hash += terrainTextures[i].GetHashCode();
+        }
+        return hash;
+    }
+
     public static Texture2DArray BasicBundler(Texture2D floor, Texture2D[] terrainTextures)
     {
         Texture2DArray textureArray = new(floor.width, floor.height, terrainTextures.Length + 1, floor.format, floor.mipmapCount > 1)

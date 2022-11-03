@@ -77,6 +77,20 @@ public static class TerrainGenerator
         ColourHeightMap(mapSettings,heightMap, noiseSettings);
     }
 
+    public static JobHandle GenerateHeightMap(JobHandle handle,NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings, MeshAreaSettings mapSettings)
+    {
+        var noiseGenerator = new SimpleNoiseHeightMapGenerator
+        {
+            areaSettings = mapSettings,
+            simpleNoise = noiseSettings,
+            heightMap = heightMap
+        };
+
+        handle =noiseGenerator.Schedule(heightMap.Length, 64, handle);
+
+        return ColourHeightMap(handle,mapSettings, heightMap, noiseSettings);
+    }
+
     /// <summary>
     /// Sets the colour of a height map layer after it has been generated base of the relative noise data and colour valus in the noiseSettings
     /// </summary>
@@ -106,6 +120,32 @@ public static class TerrainGenerator
             colouringJob.Schedule(heightMap.Length, 64).Complete();
         }
     }
+
+    public static JobHandle ColourHeightMap(JobHandle handle, MeshAreaSettings mapSettings, NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings)
+    {
+        if (mapSettings.shader == ShaderPicker.BVC)
+        {
+            var colouringJob = new HeightMapPainterBVC
+            {
+                noiseSettings = noiseSettings,
+                relativeNoiseData = CalculateRelativeNoiseData(mapSettings, heightMap),
+                HeightMap = heightMap
+            };
+            handle = colouringJob.Schedule(heightMap.Length, 64, handle);
+        }
+        else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
+        {
+            var colouringJob = new HeightMapPainterABVC
+            {
+                noiseSettings = noiseSettings,
+                relativeNoiseData = CalculateRelativeNoiseData(mapSettings, heightMap),
+                HeightMap = heightMap
+            };
+            handle = colouringJob.Schedule(heightMap.Length, 64, handle);
+        }
+        return handle;
+    }
+
 
     /// <summary>
     /// Calculates the lowest, heighest and absolute mid point of a given height map,
@@ -154,6 +194,24 @@ public static class TerrainGenerator
 
         heightMapClamper.Schedule(heightMap.Length, 64).Complete();
     }
+
+    public static JobHandle ClampToFlatFloor(JobHandle handle,NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, SimpleNoise noiseSettings)
+    {
+        handle.Complete();
+        RelativeNoiseData data = CalculateRelativeNoiseData(mapSettings, heightMap);
+        data.flatFloor = mapSettings.floorPercentage;
+        data.minValue = noiseSettings.minValue;
+        var heightMapClamper = new HeightMapClamper
+        {
+            mapSettings = mapSettings,
+            floorColour = mapSettings.floorColour,
+            relativeNoiseData = data,
+            HeightMap = heightMap
+        };
+
+        return heightMapClamper.Schedule(heightMap.Length, 64,handle);
+    }
+
 
     /// <summary>
     /// Layers two simple height maps together, blending colours and transition.
