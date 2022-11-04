@@ -41,7 +41,7 @@ public static class TerrainGenerator
                 GenerateHeightMap(current, settings,heightMaps.mapSettings);
                 if (settings.clampToFlatFloor)
                 {
-                    ClampToFlatFloor(current, heightMaps.mapSettings, settings);
+                    ClampToFlatFloor(current, heightMaps.mapSettings, settings, simpleLayers[i-1].abvcSettings.mainColour);
                 }
                 LayerTwoHeightMaps(heightMaps.mapSettings,new(settings, heightMaps.baseMap), new(settings, current), new(settings, heightMaps.result));
                 current.Dispose();
@@ -188,6 +188,21 @@ public static class TerrainGenerator
         {
             mapSettings = mapSettings,
             floorColour = mapSettings.floorColour,
+            relativeNoiseData = data,
+            HeightMap = heightMap
+        };
+
+        heightMapClamper.Schedule(heightMap.Length, 64).Complete();
+    }
+    public static void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, SimpleNoise noiseSettings, Color32 floorColour)
+    {
+        RelativeNoiseData data = CalculateRelativeNoiseData(mapSettings, heightMap);
+        data.flatFloor = mapSettings.floorPercentage;
+        data.minValue = noiseSettings.minValue;
+        var heightMapClamper = new HeightMapClamper
+        {
+            mapSettings = mapSettings,
+            floorColour = floorColour,
             relativeNoiseData = data,
             HeightMap = heightMap
         };

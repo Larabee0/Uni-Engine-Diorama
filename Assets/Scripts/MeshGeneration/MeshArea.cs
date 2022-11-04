@@ -128,7 +128,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 textureData = rawDataForTexture,
                 heightMap = heightMap
             };
-            generator.Schedule().Complete();
+            JobHandle handle = generator.Schedule();
             Debug.LogFormat("MeshGeneratorABVCT Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
             Texture2D dataTexture = new(mapSettings.mapDimentions.x, mapSettings.mapDimentions.y, TextureFormat.RGBA32, false, true)
@@ -140,7 +140,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
                 source = rawDataForTexture,
                 Destination = dataTexture.GetPixelData<Color32>(0)
             };
-            textureFiller.Schedule(rawDataForTexture.Length, 64).Complete();
+            textureFiller.Schedule(rawDataForTexture.Length, 64, handle).Complete();
             rawDataForTexture.Dispose();
             dataTexture.Apply();
             abvcTexturedMat.SetTexture("_Genereated_Data", dataTexture);
