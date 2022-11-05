@@ -28,7 +28,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private SimpleNoise firstSimpleLayer;
     [SerializeField] private SimpleNoise[] simpleLayers;
     // [Space(450)]
-
+    [SerializeField] private bool useBetterScheduling;
     [SerializeField] private bool UpdateOnChange;
 
     private Mesh activeMesh;
@@ -58,7 +58,14 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         simpleLayers[0] = firstSimpleLayer;
-        TerrainGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
+        if (useBetterScheduling)
+        {
+            TerrainGenerator.GenerateSimpleMapsBigArray(simpleLayers, new(mapSettings, baseMap, result, true));
+        }
+        else
+        {
+            TerrainGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
+        }
 
         baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
@@ -91,7 +98,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             meshRenderer.sharedMaterial = bvcMat;
             var generator = new MeshGeneratorBVC
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,
@@ -106,7 +113,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             meshRenderer.sharedMaterial = abvcMat;
             var generator = new MeshGeneratorABVC
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,
@@ -121,7 +128,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             NativeArray<float4> rawDataForTexture = new(heightMap.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             var generator = new MeshGeneratorABVCT
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,

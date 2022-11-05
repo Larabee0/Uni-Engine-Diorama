@@ -34,3 +34,44 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
         heightMap[index] = element;
     }
 }
+
+
+/// <summary>
+/// theoretically capable of generating all simple layers at once
+/// </summary>
+[BurstCompile]
+public struct BigSimpleNoiseHeightMapGenerator : IJobParallelFor
+{
+    [ReadOnly]
+    public NativeArray<SimpleNoise> simpleNoiseSettings;
+    public MeshAreaSettings areaSettings;
+    public NativeArray<HeightMapElement> allHeightMaps;
+    public void Execute(int index)
+    {
+        int mapArrayLength = areaSettings.mapDimentions.x * areaSettings.mapDimentions.y;
+
+        int settingIndex = index / mapArrayLength;
+
+        int localOffset = settingIndex * mapArrayLength;
+
+        float x = ((float)(index-localOffset) % areaSettings.mapDimentions.x) - areaSettings.mapDimentions.x / 2;
+        float y = ((float)(index-localOffset) / areaSettings.mapDimentions.x) - areaSettings.mapDimentions.y / 2;
+        SimpleNoise settings = simpleNoiseSettings[settingIndex];
+        float2 percent = new float2(x, y) / (settings.resolution - 1);
+        HeightMapElement element = allHeightMaps[index];
+        float noiseValue = element.Value;
+        float frequency = settings.baseRoughness;
+        float amplitude = 1;
+
+        for (int i = 0; i < settings.numLayers; i++)
+        {
+            float v = noise.cnoise(percent * frequency + settings.centre);
+            noiseValue += (v + 1) * 0.5f * amplitude;
+            frequency *= settings.roughness;
+            amplitude *= settings.persistence;
+        }
+        noiseValue -= settings.offsetValue;
+        element.Value = noiseValue * settings.strength;
+        allHeightMaps[index] = element;
+    }
+}

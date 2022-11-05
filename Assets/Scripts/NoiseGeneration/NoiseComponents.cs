@@ -61,7 +61,9 @@ public struct HeightMapElement : IBufferElementData
 [Serializable]
 public struct SimpleNoise : IComponentData
 {
-    public bool clampToFlatFloor;
+    [Range(0f, 1f)]
+    public float floorPercentage;
+    public bool clampToFloor;
     [Range(2, 500)]
     public int resolution;
     [Range(0.01f, 10f)]
@@ -84,6 +86,34 @@ public struct SimpleNoise : IComponentData
 
     public BVC bvcSettings;
     public ABVC abvcSettings;
+}
+
+public struct CommonSettingsWrapper
+{
+    public bool clampToFloor;
+    public float floorPercentage;
+    public float minValue;
+
+    public BVC bvcSettings;
+    public ABVC abvcSettings;
+
+    public CommonSettingsWrapper(SimpleNoise settings)
+    {
+        clampToFloor = settings.clampToFloor;
+        floorPercentage = settings.floorPercentage;
+        minValue = settings.minValue;
+        bvcSettings = settings.bvcSettings;
+        abvcSettings = settings.abvcSettings;
+    }
+
+    public CommonSettingsWrapper(RigidNoise settings)
+    {
+        clampToFloor = settings.clampToFloor;
+        floorPercentage = settings.floorPercentage;
+        minValue = settings.minValue;
+        bvcSettings = settings.bvcSettings;
+        abvcSettings = settings.abvcSettings;
+    }
 }
 
 [Serializable]
@@ -126,7 +156,9 @@ public struct ABVC
 [Serializable]
 public struct RigidNoise : IComponentData
 {
-    public bool clampToFlatFloor;
+    [Range(0f, 1f)]
+    public float floorPercentage;
+    public bool clampToFloor;
     [Range(2, 500)]
     public int resolution;
     [Range(0.01f, 10f)]
@@ -145,4 +177,7 @@ public struct RigidNoise : IComponentData
     [Range(-10f, 10f)]
     public float minValue;
     public float weightMultiplier;
+
+    public BVC bvcSettings;
+    public ABVC abvcSettings;
 }

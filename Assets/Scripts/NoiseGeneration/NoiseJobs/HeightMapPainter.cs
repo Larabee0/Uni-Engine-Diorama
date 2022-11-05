@@ -7,7 +7,7 @@ using Unity.Mathematics;
 [BurstCompile]
 public struct HeightMapPainterBVC : IJobParallelFor
 {
-    public SimpleNoise noiseSettings;
+    public CommonSettingsWrapper colourWrapper;
     public RelativeNoiseData relativeNoiseData;
 
     public NativeArray<HeightMapElement> HeightMap;
@@ -16,39 +16,106 @@ public struct HeightMapPainterBVC : IJobParallelFor
         HeightMapElement element = HeightMap[index];
         float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
 
-        element.Colour = (Vector4)Color.Lerp(noiseSettings.bvcSettings.lower, noiseSettings.bvcSettings.upper, weight);
+        element.Colour = (Vector4)Color.Lerp(colourWrapper.bvcSettings.lower, colourWrapper.bvcSettings.upper, weight);
 
         // BVC
         element.Colour.x = weight;
-        element.slopeBlend = new(noiseSettings.bvcSettings.slopeThreshold, noiseSettings.bvcSettings.blendAmount);
-        element.upperLowerColours = new float4x2((Vector4)noiseSettings.bvcSettings.lower, (Vector4)noiseSettings.bvcSettings.upper);
+        element.slopeBlend = new(colourWrapper.bvcSettings.slopeThreshold, colourWrapper.bvcSettings.blendAmount);
+        element.upperLowerColours = new float4x2((Vector4)colourWrapper.bvcSettings.lower, (Vector4)colourWrapper.bvcSettings.upper);
+        HeightMap[index] = element;
+    }
+}
+
+
+public struct BigHeightMapPainterBVC : IJobParallelFor
+{
+    public int2 mapDimentions;
+    [ReadOnly]
+    public NativeArray<CommonSettingsWrapper> colourWrappers;
+    [ReadOnly]
+    public NativeArray<RelativeNoiseData> relativeNoiseData;
+
+    public NativeArray<HeightMapElement> allMaps;
+    public void Execute(int index)
+    {
+
+        int mapArrayLength = mapDimentions.x * mapDimentions.y;
+
+        int settingIndex = index / mapArrayLength;
+
+        CommonSettingsWrapper colourWrapper = colourWrappers[settingIndex];
+        HeightMapElement element = allMaps[index];
+        float weight = math.unlerp(relativeNoiseData[settingIndex].minMax.x, relativeNoiseData[settingIndex].minMax.y, element.Value);
+
+        element.Colour = (Vector4)Color.Lerp(colourWrapper.bvcSettings.lower, colourWrapper.bvcSettings.upper, weight);
+
+        // BVC
+        element.Colour.x = weight;
+        element.slopeBlend = new(colourWrapper.bvcSettings.slopeThreshold, colourWrapper.bvcSettings.blendAmount);
+        element.upperLowerColours = new float4x2((Vector4)colourWrapper.bvcSettings.lower, (Vector4)colourWrapper.bvcSettings.upper);
+        allMaps[index] = element;
+    }
+}
+
+
+[BurstCompile]
+public struct HeightMapPainterABVC : IJobParallelFor
+{
+    public CommonSettingsWrapper colourWrapper;
+    public RelativeNoiseData relativeNoiseData;
+
+    public NativeArray<HeightMapElement> HeightMap;
+    public void Execute(int index)
+    {
+        HeightMapElement element = HeightMap[index];
+        float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
+
+        element.slopeBlend = new float2(colourWrapper.abvcSettings.slopeThreshold, colourWrapper.abvcSettings.blendAmount);
+        element.upperLowerColours = new float4x2((Vector4)colourWrapper.abvcSettings.mainColour, (Vector4)colourWrapper.abvcSettings.flatColour);        
+        element.RimColour = (Vector4)colourWrapper.abvcSettings.rimColour;
+
+        element.flatMaxHeight = colourWrapper.abvcSettings.flatMaxHeight;
+        element.heightFade = colourWrapper.abvcSettings.heightFade;
+        element.rimPower = colourWrapper.abvcSettings.rimPower;
+        element.rimFac = colourWrapper.abvcSettings.rimFacraction;
+        element.absMaxHeight = colourWrapper.abvcSettings.absolutelMaxHeight;
+        element.mainTextureIndex = colourWrapper.abvcSettings.MainTextureIndex;
+
         HeightMap[index] = element;
     }
 }
 
 [BurstCompile]
-public struct HeightMapPainterABVC : IJobParallelFor
+public struct BigHeightMapPainterABVC : IJobParallelFor
 {
-    public SimpleNoise noiseSettings;
-    public RelativeNoiseData relativeNoiseData;
+    public int2 mapDimentions;
+    [ReadOnly]
+    public NativeArray<CommonSettingsWrapper> colourWrappers;
+    [ReadOnly]
+    public NativeArray<RelativeNoiseData> relativeNoiseData;
 
-    public NativeArray<HeightMapElement> HeightMap;
+    public NativeArray<HeightMapElement> allMaps;
     public void Execute(int index)
     {
-        HeightMapElement element = HeightMap[index];
-        float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
+        int mapArrayLength = mapDimentions.x * mapDimentions.y;
 
-        element.slopeBlend = new float2(noiseSettings.abvcSettings.slopeThreshold, noiseSettings.abvcSettings.blendAmount);
-        element.upperLowerColours = new float4x2((Vector4)noiseSettings.abvcSettings.mainColour, (Vector4)noiseSettings.abvcSettings.flatColour);        
-        element.RimColour = (Vector4)noiseSettings.abvcSettings.rimColour;
+        int settingIndex = index / mapArrayLength;
 
-        element.flatMaxHeight = noiseSettings.abvcSettings.flatMaxHeight;
-        element.heightFade = noiseSettings.abvcSettings.heightFade;
-        element.rimPower = noiseSettings.abvcSettings.rimPower;
-        element.rimFac = noiseSettings.abvcSettings.rimFacraction;
-        element.absMaxHeight = noiseSettings.abvcSettings.absolutelMaxHeight;
-        element.mainTextureIndex = noiseSettings.abvcSettings.MainTextureIndex;
+        CommonSettingsWrapper colourWrapper = colourWrappers[settingIndex];
+        HeightMapElement element = allMaps[index];
+        float weight = math.unlerp(relativeNoiseData[settingIndex].minMax.x, relativeNoiseData[settingIndex].minMax.y, element.Value);
 
-        HeightMap[index] = element;
+        element.slopeBlend = new float2(colourWrapper.abvcSettings.slopeThreshold, colourWrapper.abvcSettings.blendAmount);
+        element.upperLowerColours = new float4x2((Vector4)colourWrapper.abvcSettings.mainColour, (Vector4)colourWrapper.abvcSettings.flatColour);
+        element.RimColour = (Vector4)colourWrapper.abvcSettings.rimColour;
+
+        element.flatMaxHeight = colourWrapper.abvcSettings.flatMaxHeight;
+        element.heightFade = colourWrapper.abvcSettings.heightFade;
+        element.rimPower = colourWrapper.abvcSettings.rimPower;
+        element.rimFac = colourWrapper.abvcSettings.rimFacraction;
+        element.absMaxHeight = colourWrapper.abvcSettings.absolutelMaxHeight;
+        element.mainTextureIndex = colourWrapper.abvcSettings.MainTextureIndex;
+
+        allMaps[index] = element;
     }
 }
