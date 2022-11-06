@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor.Build.Utilities;
 using UnityEngine;
 
 public struct HeightMapWrapper
@@ -28,39 +29,6 @@ public struct HeightMapWrapper
 /// </summary>
 public static class TerrainGenerator
 {
-    /// <summary>
-    /// Generates and layers height maps for all simple layers given
-    /// </summary>
-    /// <param name="simpleLayers">Height map layers</param>
-    /// <param name="heightMaps">Height map working NativeArrays</param>
-    public static void GenerateSimpleMaps(SimpleNoise[] simpleLayers, HeightMapWrapper heightMaps)
-    {
-        for (int i = 0; i < simpleLayers.Length; i++)
-        {
-            SimpleNoise settings = simpleLayers[i];
-            if (i > 0 ^ !heightMaps.firstLayer)
-            {
-                NativeArray<HeightMapElement> current = new(heightMaps.result.Length, Allocator.TempJob);
-                GenerateHeightMap(current, settings,heightMaps.mapSettings);
-                if (settings.clampToFloor)
-                {
-                    ClampToFlatFloor(current, heightMaps.mapSettings, settings, simpleLayers[i-1].abvcSettings.mainColour);
-                }
-                LayerTwoHeightMaps(heightMaps.mapSettings,new(settings, heightMaps.baseMap), new(settings, current), new(settings, heightMaps.result));
-                current.Dispose();
-            }
-            else
-            {
-                GenerateHeightMap(heightMaps.baseMap, settings,heightMaps.mapSettings);
-                if (settings.clampToFloor)
-                {
-                    ClampToFlatFloor(heightMaps.baseMap,heightMaps.mapSettings, settings);
-                }
-                heightMaps.result.CopyFrom(heightMaps.baseMap);
-            }
-        }
-    }
-
     /// <summary>
     /// **04/11/2022**
     /// This scales with large maps much better 
@@ -99,7 +67,7 @@ public static class TerrainGenerator
         NativeArray<CommonSettingsWrapper> settingWrappers = new(simpleLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
         for (int i = 0; i < nativeLayers.Length; i++)
         {
-            settingWrappers[i] = new(nativeLayers[i]);
+            settingWrappers[i] = nativeLayers[i].commonSettings;
         }
 
 
@@ -113,15 +81,15 @@ public static class TerrainGenerator
         };
 
         JobHandle main = noiseGenerator.Schedule(allLayers.Length, 64);
-        // main.Complete();
-        NativeArray<RelativeNoiseData> relativeData;
-        (main, relativeData) = BigCalculateRelativeNoiseData(main, mapSettings, settingWrappers, allLayers);
+
+        NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        main = BigCalculateRelativeNoiseData(main, mapSettings,relativeData, settingWrappers, allLayers);
 
         main = BigColourHeightMap(main, mapSettings, allLayers, settingWrappers, relativeData);
 
         main = BigClampToFlatFloor(main, allLayers, mapSettings, settingWrappers, relativeData);
 
-        (main, relativeData) = BigCalculateRelativeNoiseData(main, mapSettings, settingWrappers, allLayers);
+        main= BigCalculateRelativeNoiseData(main, mapSettings, relativeData, settingWrappers, allLayers);
         var resultCopy = new ResultCopy
         {
             allLayers = allLayers.GetSubArray(0, heightMaps.result.Length),
@@ -158,7 +126,7 @@ public static class TerrainGenerator
         NativeArray<CommonSettingsWrapper> settingWrappers = new(rigidLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
         for (int i = 0; i < nativeLayers.Length; i++)
         {
-            settingWrappers[i] = new(nativeLayers[i]);
+            settingWrappers[i] = nativeLayers[i].commonSettings;
         }
 
         MeshAreaSettings mapSettings = heightMaps.mapSettings;
@@ -171,15 +139,16 @@ public static class TerrainGenerator
         };
 
         JobHandle main = noiseGenerator.Schedule(allLayers.Length, 64);
-        // main.Complete();
-        NativeArray<RelativeNoiseData> relativeData;
-        (main, relativeData) = BigCalculateRelativeNoiseData(main, mapSettings, settingWrappers, allLayers);
+
+
+        NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, settingWrappers, allLayers);
 
         main = BigColourHeightMap(main, mapSettings, allLayers, settingWrappers, relativeData);
 
         main = BigClampToFlatFloor(main, allLayers, mapSettings, settingWrappers, relativeData);
 
-        (main, relativeData) = BigCalculateRelativeNoiseData(main, mapSettings, settingWrappers, allLayers);
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, settingWrappers, allLayers);
         var resultCopy = new ResultCopy
         {
             allLayers = allLayers.GetSubArray(0, heightMaps.result.Length),
@@ -205,56 +174,6 @@ public static class TerrainGenerator
         nativeLayers.Dispose();
         settingWrappers.Dispose();
         allLayers.Dispose();
-    }
-
-
-    /// <summary>
-    /// Generates a height map using the give simple noise settings and main map settings
-    /// </summary>
-    /// <param name="heightMap"> output array of height map </param>
-    /// <param name="noiseSettings"> noise settings </param>
-    public static void GenerateHeightMap(NativeArray<HeightMapElement> heightMap, SimpleNoise noiseSettings, MeshAreaSettings mapSettings)
-    {
-        var noiseGenerator = new SimpleNoiseHeightMapGenerator
-        {
-            areaSettings = mapSettings,
-            simpleNoise = noiseSettings,
-            heightMap = heightMap
-        };
-
-        noiseGenerator.Schedule(heightMap.Length, 64).Complete();
-
-        ColourHeightMap(mapSettings,heightMap, new(noiseSettings));
-    }
-
-    /// <summary>
-    /// Sets the colour of a height map layer after it has been generated base of the relative noise data and colour valus in the noiseSettings
-    /// </summary>
-    /// <param name="mapSettings">Main map settings</param>
-    /// <param name="heightMap">Height map layer to colour</param>
-    /// <param name="commonSettings">layer settings</param>
-    public static void ColourHeightMap(MeshAreaSettings mapSettings, NativeArray<HeightMapElement> heightMap, CommonSettingsWrapper commonSettings)
-    {
-        if (mapSettings.shader == ShaderPicker.BVC)
-        {
-            var colouringJob = new HeightMapPainterBVC
-            {
-                colourWrapper = commonSettings,
-                relativeNoiseData = CalculateRelativeNoiseData(commonSettings.floorPercentage, heightMap),
-                HeightMap = heightMap
-            };
-            colouringJob.Schedule(heightMap.Length, 64).Complete();
-        }
-        else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
-        {
-            var colouringJob = new HeightMapPainterABVC
-            {
-                colourWrapper = commonSettings,
-                relativeNoiseData = CalculateRelativeNoiseData(commonSettings.floorPercentage, heightMap),
-                HeightMap = heightMap
-            };
-            colouringJob.Schedule(heightMap.Length, 64).Complete();
-        }
     }
 
     public static JobHandle BigColourHeightMap(JobHandle handle, MeshAreaSettings mapSettings, NativeArray<HeightMapElement> allLayers, NativeArray<CommonSettingsWrapper> commonSettings, NativeArray<RelativeNoiseData> relativeData)
@@ -309,9 +228,8 @@ public static class TerrainGenerator
         return data;
     }
 
-    public static (JobHandle, NativeArray<RelativeNoiseData>) BigCalculateRelativeNoiseData(JobHandle jobHandle, MeshAreaSettings mapSettings,NativeArray<CommonSettingsWrapper> commonSettings, NativeArray<HeightMapElement> heightMaps)
+    public static JobHandle BigCalculateRelativeNoiseData(JobHandle jobHandle, MeshAreaSettings mapSettings, NativeArray<RelativeNoiseData> relativeData, NativeArray<CommonSettingsWrapper> commonSettings, NativeArray<HeightMapElement> heightMaps)
     {
-        NativeArray<RelativeNoiseData> relativeData = new(commonSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
         var heightMapMinMaxer = new BigHeightMapMinMaxCal
         {
@@ -321,45 +239,7 @@ public static class TerrainGenerator
             commonSettings = commonSettings,
         };
 
-        return (heightMapMinMaxer.Schedule(commonSettings.Length, 1, jobHandle), relativeData);
-    }
-
-    /// <summary>
-    /// Clamps the lower height map to be at a certain % up the range of the height map
-    /// these points are coloured using the floor colour value (for water)
-    /// </summary>
-    /// <param name="heightMap">Height map to clamp </param>
-    /// <param name="mapSettings">Main map settings</param>
-    /// <param name="noiseSettings">Height map noise settings</param>
-    public static void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, SimpleNoise noiseSettings)
-    {
-        RelativeNoiseData data = CalculateRelativeNoiseData(noiseSettings.floorPercentage, heightMap);
-        data.flatFloor = noiseSettings.floorPercentage;
-        data.minValue = noiseSettings.minValue;
-        var heightMapClamper = new HeightMapClamper
-        {
-            mapSettings = mapSettings,
-            floorColour = mapSettings.floorColour,
-            relativeNoiseData = data,
-            HeightMap = heightMap
-        };
-
-        heightMapClamper.Schedule(heightMap.Length, 64).Complete();
-    }
-    public static void ClampToFlatFloor(NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, SimpleNoise noiseSettings, Color32 floorColour)
-    {
-        RelativeNoiseData data = CalculateRelativeNoiseData(noiseSettings.floorPercentage, heightMap);
-        data.flatFloor = noiseSettings.floorPercentage;
-        data.minValue = noiseSettings.minValue;
-        var heightMapClamper = new HeightMapClamper
-        {
-            mapSettings = mapSettings,
-            floorColour = floorColour,
-            relativeNoiseData = data,
-            HeightMap = heightMap
-        };
-
-        heightMapClamper.Schedule(heightMap.Length, 64).Complete();
+        return heightMapMinMaxer.Schedule(commonSettings.Length, 1, jobHandle);
     }
 
     public static JobHandle BigClampToFlatFloor(JobHandle handle,NativeArray<HeightMapElement> heightMap, MeshAreaSettings mapSettings, NativeArray<CommonSettingsWrapper> commonSettings,NativeArray<RelativeNoiseData> relativeData)
@@ -375,28 +255,4 @@ public static class TerrainGenerator
         return heightMapClamper.Schedule(heightMap.Length, 64,handle);
     }
 
-
-    /// <summary>
-    /// Layers two simple height maps together, blending colours and transition.
-    /// </summary>
-    /// <param name="mapSettings">Main map settings</param>
-    /// <param name="baseMap">Current main height map</param>
-    /// <param name="newMap">New layer to be merged onto main</param>
-    /// <param name="result">Resultant height map wrapper</param>
-    private static void LayerTwoHeightMaps(MeshAreaSettings mapSettings,SimpleHeightMapWrapper baseMap, SimpleHeightMapWrapper newMap, SimpleHeightMapWrapper result)
-    {
-        baseMap.noiseData = CalculateRelativeNoiseData(baseMap.simpleNoise.floorPercentage, baseMap.heightMap);
-        newMap.noiseData = CalculateRelativeNoiseData(newMap.simpleNoise.floorPercentage, newMap.heightMap);
-        newMap.noiseData.minValue = newMap.simpleNoise.riseUp;
-        var layerer = new HeightMapLayerer
-        {
-            mapSettings = mapSettings,
-            baseRelative = baseMap.noiseData,
-            heightMapRelative = newMap.noiseData,
-            baseLayer = baseMap.heightMap,
-            targetLayer = newMap.heightMap,
-            resultMap = result.heightMap
-        };
-        layerer.Schedule(result.heightMap.Length, 64).Complete();
-    }
 }

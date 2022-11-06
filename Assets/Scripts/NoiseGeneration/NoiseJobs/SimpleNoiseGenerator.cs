@@ -16,21 +16,21 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
         float x = ((float)index % areaSettings.mapDimentions.x)-areaSettings.mapDimentions.x/2;
         float y = ((float)index / areaSettings.mapDimentions.x)-areaSettings.mapDimentions.y/2;
 
-        float2 percent = new float2(x, y) / (simpleNoise.resolution - 1);
+        float2 percent = new float2(x, y) / (simpleNoise.Resolution - 1);
         HeightMapElement element = heightMap[index];
         float noiseValue = element.Value;
-        float frequency = simpleNoise.baseRoughness;
+        float frequency = simpleNoise.BaseRoughness;
         float amplitude = 1;
 
-        for (int i = 0; i < simpleNoise.numLayers; i++)
+        for (int i = 0; i < simpleNoise.NumLayers; i++)
         {
-            float v = noise.cnoise(percent * frequency + simpleNoise.centre);
+            float v = noise.cnoise(percent * frequency + simpleNoise.Centre);
             noiseValue += (v + 1) * 0.5f * amplitude;
-            frequency *= simpleNoise.roughness;
-            amplitude *= simpleNoise.persistence;
+            frequency *= simpleNoise.Roughness;
+            amplitude *= simpleNoise.Persistence;
         }
         //noiseValue -= simpleNoise.offsetValue;
-        element.Value = noiseValue * simpleNoise.strength;
+        element.Value = noiseValue * simpleNoise.Strength;
         heightMap[index] = element;
     }
 }
@@ -57,21 +57,21 @@ public struct BigSimpleNoiseHeightMapGenerator : IJobParallelFor
         float x = ((float)(index-localOffset) % areaSettings.mapDimentions.x) - areaSettings.mapDimentions.x / 2;
         float y = ((float)(index-localOffset) / areaSettings.mapDimentions.x) - areaSettings.mapDimentions.y / 2;
         SimpleNoise settings = simpleNoiseSettings[settingIndex];
-        float2 percent = new float2(x, y) / (settings.resolution - 1);
+        float2 percent = new float2(x, y) / (settings.Resolution - 1);
         HeightMapElement element = allHeightMaps[index];
         float noiseValue = element.Value;
-        float frequency = settings.baseRoughness;
+        float frequency = settings.BaseRoughness;
         float amplitude = 1;
 
-        for (int i = 0; i < settings.numLayers; i++)
+        for (int i = 0; i < settings.NumLayers; i++)
         {
-            float v = noise.cnoise(percent * frequency + settings.centre);
+            float v = noise.cnoise(percent * frequency + settings.Centre);
             noiseValue += (v + 1) * 0.5f * amplitude;
-            frequency *= settings.roughness;
-            amplitude *= settings.persistence;
+            frequency *= settings.Roughness;
+            amplitude *= settings.Persistence;
         }
-        noiseValue -= settings.offsetValue;
-        element.Value = noiseValue * settings.strength;
+        noiseValue -= settings.OffsetValue;
+        element.Value = noiseValue * settings.Strength;
         allHeightMaps[index] = element;
     }
 }

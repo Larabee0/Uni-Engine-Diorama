@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public enum FirstLayer
+public enum LayerType
 {
     Simple,
     Rigid
@@ -59,11 +59,71 @@ public struct HeightMapElement : IBufferElementData
 }
 
 [Serializable]
+public struct NoiseSettings
+{
+    public LayerType layerType;
+    public CommonSettingsWrapper basicSettings;
+    public SimpleNoise simpleNoise;
+    public RigidNoise rigidNoise;
+}
+
+[Serializable]
 public struct SimpleNoise : IComponentData
 {
+    [HideInInspector]
+    public CommonSettingsWrapper commonSettings;
+
+
+    public bool ClampToFloor => commonSettings.clampToFloor;
+    public float FloorPercentage => commonSettings.floorPercentage;
+    public float MinValue => commonSettings.minValue;
+    public int Resolution => commonSettings.resolution;
+    public float Strength => commonSettings.strength;
+    public int NumLayers => commonSettings.numLayers;
+    public float BaseRoughness => commonSettings.baseRoughness;
+    public float Roughness => commonSettings.roughness;
+    public float Persistence => commonSettings.persistence;
+    public float2 Centre => commonSettings.centre;
+    public float OffsetValue => commonSettings.offsetValue;
+
+    public BVC BvcSettings => commonSettings.bvcSettings;
+    public ABVC AbvcSettings => commonSettings.abvcSettings;
+}
+
+[Serializable]
+public struct RigidNoise : IComponentData
+{
+    [HideInInspector]
+    public CommonSettingsWrapper commonSettings;
+    public float weightMultiplier;
+
+
+    public bool ClampToFloor => commonSettings.clampToFloor;
+    public float FloorPercentage => commonSettings.floorPercentage;
+    public float MinValue => commonSettings.minValue;
+    public int Resolution => commonSettings.resolution;
+    public float Strength => commonSettings.strength;
+    public int NumLayers => commonSettings.numLayers;
+    public float BaseRoughness => commonSettings.baseRoughness;
+    public float Roughness => commonSettings.roughness;
+    public float Persistence => commonSettings.persistence;
+    public float2 Centre => commonSettings.centre;
+    public float OffsetValue => commonSettings.offsetValue;
+    public float WeightMultiplier => weightMultiplier;
+
+    public BVC BvcSettings => commonSettings.bvcSettings;
+    public ABVC AbvcSettings => commonSettings.abvcSettings;
+
+}
+
+[Serializable]
+public struct CommonSettingsWrapper
+{
+    public bool clampToFloor;
     [Range(0f, 1f)]
     public float floorPercentage;
-    public bool clampToFloor;
+    [Range(-10f, 10f)]
+    public float minValue;
     [Range(2, 500)]
     public int resolution;
     [Range(0.01f, 10f)]
@@ -79,41 +139,9 @@ public struct SimpleNoise : IComponentData
     public float2 centre;
     [Range(-4f, 4f)]
     public float offsetValue;
-    [Range(-10f, 10f)]
-    public float minValue;
-    [Range(-1f, 1f)]
-    public float riseUp;
 
     public BVC bvcSettings;
     public ABVC abvcSettings;
-}
-
-public struct CommonSettingsWrapper
-{
-    public bool clampToFloor;
-    public float floorPercentage;
-    public float minValue;
-
-    public BVC bvcSettings;
-    public ABVC abvcSettings;
-
-    public CommonSettingsWrapper(SimpleNoise settings)
-    {
-        clampToFloor = settings.clampToFloor;
-        floorPercentage = settings.floorPercentage;
-        minValue = settings.minValue;
-        bvcSettings = settings.bvcSettings;
-        abvcSettings = settings.abvcSettings;
-    }
-
-    public CommonSettingsWrapper(RigidNoise settings)
-    {
-        clampToFloor = settings.clampToFloor;
-        floorPercentage = settings.floorPercentage;
-        minValue = settings.minValue;
-        bvcSettings = settings.bvcSettings;
-        abvcSettings = settings.abvcSettings;
-    }
 }
 
 [Serializable]
@@ -152,32 +180,3 @@ public struct ABVC
     public float absolutelMaxHeight;
 }
 
-
-[Serializable]
-public struct RigidNoise : IComponentData
-{
-    [Range(0f, 1f)]
-    public float floorPercentage;
-    public bool clampToFloor;
-    [Range(2, 500)]
-    public int resolution;
-    [Range(0.01f, 10f)]
-    public float strength;
-    [Range(1f, 8f)]
-    public int numLayers;
-    [Range(0.01f, 4f)]
-    public float baseRoughness;
-    [Range(0.01f, 4f)]
-    public float roughness;
-    [Range(0.01f, 4f)]
-    public float persistence;
-    public float2 centre;
-    [Range(-4f, 4f)]
-    public float offsetValue;
-    [Range(-10f, 10f)]
-    public float minValue;
-    public float weightMultiplier;
-
-    public BVC bvcSettings;
-    public ABVC abvcSettings;
-}

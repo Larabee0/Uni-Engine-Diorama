@@ -4,29 +4,6 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-[BurstCompile]
-public struct HeightMapPainterBVC : IJobParallelFor
-{
-    public CommonSettingsWrapper colourWrapper;
-    public RelativeNoiseData relativeNoiseData;
-
-    public NativeArray<HeightMapElement> HeightMap;
-    public void Execute(int index)
-    {
-        HeightMapElement element = HeightMap[index];
-        float weight = math.unlerp(relativeNoiseData.minMax.x, relativeNoiseData.minMax.y, element.Value);
-
-        element.Colour = (Vector4)Color.Lerp(colourWrapper.bvcSettings.lower, colourWrapper.bvcSettings.upper, weight);
-
-        // BVC
-        element.Colour.x = weight;
-        element.slopeBlend = new(colourWrapper.bvcSettings.slopeThreshold, colourWrapper.bvcSettings.blendAmount);
-        element.upperLowerColours = new float4x2((Vector4)colourWrapper.bvcSettings.lower, (Vector4)colourWrapper.bvcSettings.upper);
-        HeightMap[index] = element;
-    }
-}
-
-
 public struct BigHeightMapPainterBVC : IJobParallelFor
 {
     public int2 mapDimentions;

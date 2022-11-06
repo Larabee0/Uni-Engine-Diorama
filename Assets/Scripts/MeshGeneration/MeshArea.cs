@@ -25,10 +25,9 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [Tooltip("First element in the simple layers list is overwritten by this property.\nThis is a work around for an editor bug when trying to edit the first element of a collection.")]
-    [SerializeField] private SimpleNoise firstSimpleLayer;
-    [SerializeField] private SimpleNoise[] simpleLayers;
-    // [Space(450)]
-    [SerializeField] private bool useBetterScheduling;
+    [SerializeField] private NoiseSettings firstNoiseLayer;
+    [SerializeField] private NoiseSettings[] noiseLayers;
+
     [SerializeField] private bool UpdateOnChange;
 
     private Mesh activeMesh;
@@ -57,15 +56,9 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         float start = Time.realtimeSinceStartup;
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
-        simpleLayers[0] = firstSimpleLayer;
-        if (useBetterScheduling)
-        {
-            TerrainGenerator.GenerateSimpleMapsBigArray(simpleLayers, new(mapSettings, baseMap, result, true));
-        }
-        else
-        {
-            TerrainGenerator.GenerateSimpleMaps(simpleLayers, new(mapSettings, baseMap, result, true));
-        }
+        noiseLayers[0] = firstNoiseLayer;
+
+        TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
 
         baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
@@ -178,7 +171,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         MeshAreaRef mesh = new() { Value = GetComponent<MeshFilter>().mesh };
 
         dstManager.AddComponentData(entity, mapSettings);
-        dstManager.AddComponentData(entity, simpleLayers[0]);
+        // dstManager.AddComponentData(entity, noiseLayers[0]);
         dstManager.AddComponentData(entity, mesh);
         dstManager.AddComponent<UpdateMeshArea>(entity);
         dstManager.AddComponent<GenerateHeightMap>(entity);
