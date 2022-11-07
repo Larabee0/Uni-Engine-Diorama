@@ -63,8 +63,10 @@ public struct NoiseSettings
 {
     public LayerType layerType;
     public CommonSettingsWrapper basicSettings;
-    public SimpleNoise simpleNoise;
-    public RigidNoise rigidNoise;
+    public SimpleNoise SimpleNoise => new() { commonSettings = basicSettings };
+    public RigidNoise RigidNoise => new() { commonSettings = basicSettings, weightMultiplier = weightMultiplier };
+    [Tooltip("For Rigid Noise Only")]
+    public float weightMultiplier;
 }
 
 [Serializable]

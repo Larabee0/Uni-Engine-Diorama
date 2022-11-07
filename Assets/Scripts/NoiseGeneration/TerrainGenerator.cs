@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Rendering;
 using UnityEditor.Build.Utilities;
 using UnityEngine;
 
@@ -60,9 +61,8 @@ public static class TerrainGenerator
     /// <param name="heightMaps"></param>
     public static void GenerateSimpleMapsBigArray(SimpleNoise[] simpleLayers, HeightMapWrapper heightMaps)
     {
-        int2 dim = heightMaps.mapSettings.mapDimentions;
         NativeArray<SimpleNoise> nativeLayers = new(simpleLayers, Allocator.TempJob);
-        NativeArray<HeightMapElement> allLayers = new(dim.x * dim.y * simpleLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        NativeArray<HeightMapElement> allLayers = new(heightMaps.mapSettings.mapDimentions.x * heightMaps.mapSettings.mapDimentions.y * simpleLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
         NativeArray<CommonSettingsWrapper> settingWrappers = new(simpleLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
         for (int i = 0; i < nativeLayers.Length; i++)
@@ -175,6 +175,61 @@ public static class TerrainGenerator
         settingWrappers.Dispose();
         allLayers.Dispose();
     }
+
+    public static void GenerateCommonMaps(NoiseSettings[] noiseSettings, MeshAreaSettings mapSettings,NativeArray<HeightMapElement> resultHeightMap)
+    {
+        NativeArray<NoiseSettings> nativeLayers = new(noiseSettings, Allocator.TempJob);
+        NativeArray<CommonSettingsWrapper> commonSettingWrappers = new(noiseSettings.Length, Allocator.TempJob,NativeArrayOptions.UninitializedMemory);
+        NativeArray<HeightMapElement> allLayers = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y * noiseSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        for (int i = 0; i < nativeLayers.Length; i++)
+        {
+            commonSettingWrappers[i] = nativeLayers[i].basicSettings;
+        }
+
+        var noiseGenerator = new CommonNoiseGenerator
+        {
+            areaSettings = mapSettings,
+            noiseSettings = nativeLayers,
+            allHeightMaps = allLayers
+        };
+
+        JobHandle main = noiseGenerator.Schedule(allLayers.Length, 64);
+
+        NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
+
+        main = BigColourHeightMap(main, mapSettings, allLayers, commonSettingWrappers, relativeData);
+
+        main = BigClampToFlatFloor(main, allLayers, mapSettings, commonSettingWrappers, relativeData);
+
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
+        var resultCopy = new ResultCopy
+        {
+            allLayers = allLayers.GetSubArray(0, resultHeightMap.Length),
+            result = resultHeightMap
+        };
+
+        main = resultCopy.Schedule(resultHeightMap.Length, 128, main);
+
+        for (int i = 1; i < noiseSettings.Length; i++)
+        {
+            var layerer = new BigHeightMapLayerer
+            {
+                mapSettings = mapSettings,
+                heightMapRelative = relativeData,
+                baseLayer = allLayers.GetSubArray(0, resultHeightMap.Length),
+                targetLayer = allLayers.GetSubArray(i * resultHeightMap.Length, resultHeightMap.Length),
+                resultMap = resultHeightMap
+            };
+            main = layerer.Schedule(resultHeightMap.Length, 64, main);
+            main.Complete();
+        }
+        relativeData.Dispose();
+        commonSettingWrappers.Dispose();
+        nativeLayers.Dispose();
+        allLayers.Dispose();
+    }
+
 
     public static JobHandle BigColourHeightMap(JobHandle handle, MeshAreaSettings mapSettings, NativeArray<HeightMapElement> allLayers, NativeArray<CommonSettingsWrapper> commonSettings, NativeArray<RelativeNoiseData> relativeData)
     {

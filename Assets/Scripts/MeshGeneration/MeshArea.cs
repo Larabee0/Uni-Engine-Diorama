@@ -55,12 +55,14 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     {
         float start = Time.realtimeSinceStartup;
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
-        NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
+        // NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         noiseLayers[0] = firstNoiseLayer;
 
-        TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
+        // TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
 
-        baseMap.Dispose();
+        TerrainGenerator.GenerateCommonMaps(noiseLayers, mapSettings, result);
+
+        // baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
         start = Time.realtimeSinceStartup;
         GenerateHeightMapMesh(result);
