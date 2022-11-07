@@ -64,9 +64,9 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
         // baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
-        start = Time.realtimeSinceStartup;
+        
         GenerateHeightMapMesh(result);
-        Debug.LogFormat("Total Mesh Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
+        Debug.LogFormat("Total Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
     }
 
