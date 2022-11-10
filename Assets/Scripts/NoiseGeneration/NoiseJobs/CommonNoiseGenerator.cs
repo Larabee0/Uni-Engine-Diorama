@@ -50,7 +50,7 @@ public struct CommonNoiseGenerator : IJobParallelFor
             frequency *= settings.Roughness;
             amplitude *= settings.Persistence;
         }
-        noiseValue -= settings.OffsetValue;
+        noiseValue += settings.OffsetValue;
         element.Value = noiseValue * settings.Strength;
 
         return element;
@@ -78,7 +78,7 @@ public struct CommonNoiseGenerator : IJobParallelFor
             amplitude *= settings.Persistence;
         }
 
-        noiseValue -= settings.OffsetValue;
+        noiseValue += settings.OffsetValue;
         element.Value = noiseValue * settings.Strength;
         return element;
     }
