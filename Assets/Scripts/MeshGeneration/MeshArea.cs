@@ -46,6 +46,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
     private void OnValidate()
     {
+
         if (UpdateOnChange)
         {
             Generate();
@@ -58,6 +59,14 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         // NativeArray<HeightMapElement> baseMap = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
         noiseLayers[0] = firstNoiseLayer;
+
+        for (int i = 0; i < noiseLayers.Length; i++)
+        {
+            if (noiseLayers[i].basicSettings.seed < 1)
+            {
+                noiseLayers[i].basicSettings.seed = 1;
+            }
+        }
 
         // TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
 

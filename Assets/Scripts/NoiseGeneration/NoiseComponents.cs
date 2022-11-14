@@ -61,6 +61,7 @@ public struct HeightMapElement : IBufferElementData
 [Serializable]
 public struct NoiseSettings
 {
+
     public LayerType layerType;
     public CommonSettingsWrapper basicSettings;
     public SimpleNoise SimpleNoise => new() { commonSettings = basicSettings };
@@ -123,6 +124,7 @@ public struct RigidNoise : IComponentData
 [Serializable]
 public struct CommonSettingsWrapper
 {
+    public uint seed;
     public bool clampToFloor;
     [Range(0f, 1f)]
     public float floorPercentage;
@@ -188,18 +190,29 @@ public struct ABVC
 [System.Serializable]
 public struct ErodeSettings
 {
+    public bool erosion;
+    public uint baseSeed;
+    public int erosionIterations;
+    [HideInInspector]
     public int mapSize;
+    [HideInInspector]
     public int mapSizeWithBorder;
-    public float startWater;
-    public float startSpeed;
-    public int maxLifetime;
-    public float inertia;
+    [HideInInspector]
+    public int borderOffset;
+    [Range(2, 8)]
     public int erosionBrushRadius;
+    [Range(0, 1)]
+    public float inertia;
     public float sedimentCapacityFactor;
     public float minSedimentCapacity;
-    public float depositSpeed;
+    [Range(0, 1)]
     public float erodeSpeed;
-    public float gravity;
+    [Range(0, 1)]
+    public float depositSpeed;
+    [Range(0, 1)]
     public float evaporateSpeed;
-    public uint baseSeed;
+    public float gravity;
+    public int maxLifetime;
+    public float startWater;
+    public float startSpeed;
 }

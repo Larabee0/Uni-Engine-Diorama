@@ -8,6 +8,8 @@ public struct CommonNoiseGenerator : IJobParallelFor
 {
     [ReadOnly]
     public NativeArray<NoiseSettings> noiseSettings;
+    [ReadOnly]
+    public NativeParallelHashSet<int> excludeLayers;
     public MeshAreaSettings areaSettings;
     public NativeArray<HeightMapElement> allHeightMaps;
     public void Execute(int index)
@@ -16,6 +18,10 @@ public struct CommonNoiseGenerator : IJobParallelFor
         int mapArrayLength = areaSettings.mapDimentions.x * areaSettings.mapDimentions.y;
 
         int settingsIndex = index / mapArrayLength;
+        if (excludeLayers.Contains(settingsIndex))
+        {
+            return;
+        }
 
         int localOffset = settingsIndex * mapArrayLength;
 
@@ -58,7 +64,6 @@ public struct CommonNoiseGenerator : IJobParallelFor
 
     private HeightMapElement RigidNoiseGenerator(int index, float2 xy, RigidNoise settings)
     {
-
         HeightMapElement element = allHeightMaps[index];
         float2 percent = xy / (settings.Resolution - 1);
         float noiseValue = element.Value;

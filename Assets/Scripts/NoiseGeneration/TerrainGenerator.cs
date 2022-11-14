@@ -2,6 +2,7 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -181,19 +182,53 @@ public static class TerrainGenerator
         NativeArray<NoiseSettings> nativeLayers = new(noiseSettings, Allocator.TempJob);
         NativeArray<CommonSettingsWrapper> commonSettingWrappers = new(noiseSettings.Length, Allocator.TempJob,NativeArrayOptions.UninitializedMemory);
         NativeArray<HeightMapElement> allLayers = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y * noiseSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+        int markedForErosion = 0;
+        NativeParallelHashSet<int> excludedLayers = new(noiseSettings.Length, Allocator.TempJob);
         for (int i = 0; i < nativeLayers.Length; i++)
         {
-            commonSettingWrappers[i] = nativeLayers[i].basicSettings;
+            commonSettingWrappers[i] = noiseSettings[i].basicSettings;
+            if (nativeLayers[i].layerType == LayerType.Rigid && nativeLayers[i].RigidNoise.erosionSettings.erosion)
+            {
+                excludedLayers.Add(i);
+                markedForErosion++;
+            }
         }
 
         var noiseGenerator = new CommonNoiseGenerator
         {
             areaSettings = mapSettings,
             noiseSettings = nativeLayers,
-            allHeightMaps = allLayers
+            allHeightMaps = allLayers,
+            excludeLayers= excludedLayers,
         };
 
         JobHandle main = noiseGenerator.Schedule(allLayers.Length, 448);
+
+        if (markedForErosion > 0)
+        {
+            main = JobHandle.CombineDependencies(GenerateErodedMaps(noiseSettings, mapSettings, out NativeArray<HeightMapElement> erosionLayers), main);
+            NativeArray<int> erosionSettingsIndexRemap = new(noiseSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            for (int ns = 0,i = 0; ns < noiseSettings.Length; ns++)
+            {
+                if (nativeLayers[ns].layerType == LayerType.Rigid && nativeLayers[i].RigidNoise.erosionSettings.erosion)
+                {
+                    erosionSettingsIndexRemap[ns] = i;
+                    i++;
+                }
+            }
+
+            var erosionMerge = new ErosionCombiner
+            {
+                mapSettings = mapSettings,
+                noiseSettings = nativeLayers,
+                erosionSettingsIndexRemap = erosionSettingsIndexRemap,
+                source = erosionLayers,
+                destination = allLayers
+            };
+            main = erosionMerge.Schedule(allLayers.Length, main);
+
+        }
 
         NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
         main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
@@ -225,10 +260,126 @@ public static class TerrainGenerator
             main = layerer.Schedule(resultHeightMap.Length,512, main);
             main.Complete();
         }
+        excludedLayers.Dispose();
         relativeData.Dispose();
         commonSettingWrappers.Dispose();
         nativeLayers.Dispose();
         allLayers.Dispose();
+    }
+
+    private static JobHandle GenerateErodedMaps(NoiseSettings[] noiseSettings, MeshAreaSettings mapSettings, out NativeArray<HeightMapElement> erosionResults)
+    {
+        List<NoiseSettings> erosionLayers = new();
+        int largestBrush = int.MinValue;
+        for (int i = 0; i < noiseSettings.Length; i++)
+        {
+            if (noiseSettings[i].layerType == LayerType.Rigid && noiseSettings[i].RigidNoise.erosionSettings.erosion)
+            {
+                erosionLayers.Add(noiseSettings[i]);
+                if(noiseSettings[i].RigidNoise.erosionSettings.erosionBrushRadius > largestBrush)
+                {
+                    largestBrush = noiseSettings[i].RigidNoise.erosionSettings.erosionBrushRadius;
+                }
+            }
+        }
+        
+        int totalIterations = 0;
+        int erosionMaxDimentions = (mapSettings.mapDimentions.x + largestBrush * 2) * (mapSettings.mapDimentions.y + largestBrush * 2);
+
+        NativeArray<NoiseSettings> nativeLayers = new(erosionLayers.ToArray(), Allocator.TempJob);
+        erosionResults = new(erosionMaxDimentions * nativeLayers.Length, Allocator.TempJob);//, NativeArrayOptions.UninitializedMemory);
+        NativeArray<int2> brushRanges = new(nativeLayers.Length,Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        List<int> brushIndexOffsets = new(largestBrush * largestBrush * nativeLayers.Length);
+        List<float> brushWeights = new(largestBrush * largestBrush * nativeLayers.Length);
+        for (int i = 0; i < nativeLayers.Length; i++)
+        {
+            NoiseSettings value = nativeLayers[i];
+            value.erosionSettings.borderOffset = largestBrush-value.erosionSettings.erosionBrushRadius;
+            value.erosionSettings.mapSize = mapSettings.mapDimentions.x * mapSettings.mapDimentions.y;
+            value.erosionSettings.mapSizeWithBorder = mapSettings.mapDimentions.x + largestBrush * 2;
+            value.erosionSettings.baseSeed = value.basicSettings.seed;
+            totalIterations += value.erosionSettings.erosionIterations;
+            nativeLayers[i] = value;
+            float weightSum = 0;
+            int brushRadius = value.erosionSettings.erosionBrushRadius;
+            int2 brushIndex = brushIndexOffsets.Count;
+            for (int brushY = -brushRadius; brushY <= brushRadius; brushY++)
+            {
+                for (int brushX = -brushRadius; brushX <= brushRadius; brushX++)
+                {
+                    float sqrDst = brushX * brushX + brushY * brushY;
+                    if(sqrDst < brushRadius * brushRadius)
+                    {
+                        brushIndexOffsets.Add(brushY * mapSettings.mapDimentions.x + brushX);
+                        float brushWeight = 1 - math.sqrt(sqrDst) / brushRadius;
+                        weightSum+= brushWeight;
+                        brushWeights.Add(brushWeight);
+                    }
+                }
+            }
+            for (int j = 0; j < brushWeights.Count; j++)
+            {
+                brushWeights[j] /= weightSum;
+            }
+            brushIndex.y = brushIndexOffsets.Count;
+            brushRanges[i] = brushIndex;
+        }
+
+        NativeParallelHashSet<int> excludedLayers = new(1,Allocator.TempJob);
+
+        NativeArray<RandomErosionElement> randomIndices = new(totalIterations, Allocator.TempJob);
+        NativeArray<int> layerStartIndices = new(nativeLayers.Length,Allocator.TempJob,NativeArrayOptions.UninitializedMemory);
+        for (int i = nativeLayers.Length-1; i >= 0; i--)
+        {
+            totalIterations -= nativeLayers[i].erosionSettings.erosionIterations;
+            layerStartIndices[i] = totalIterations;
+        }
+
+        var noiseGenerator = new CommonNoiseGenerator
+        {
+            areaSettings = mapSettings,
+            noiseSettings = nativeLayers,
+            allHeightMaps = erosionResults,
+            excludeLayers = excludedLayers,
+        };
+
+        noiseGenerator.areaSettings.mapDimentions = new()
+        {
+            x = mapSettings.mapDimentions.x + largestBrush * 2,
+            y = mapSettings.mapDimentions.y + largestBrush * 2,
+        };
+
+        JobHandle eroder = excludedLayers.Dispose(noiseGenerator.Schedule(erosionResults.Length, 448));
+        var indexGenerator = new RandomIndexGenerator
+        {
+            mapSettings = mapSettings,
+            eroisonSettings = nativeLayers,
+            layerStartIndices = layerStartIndices,
+            randomIndices = randomIndices
+        };
+        //eroder = JobHandle.CombineDependencies(indexGenerator.Schedule(randomIndices.Length, 64),eroder);
+        
+        indexGenerator.Schedule(randomIndices.Length,64,default).Complete();
+        var erosionJob = new BigErodeJob
+        {
+            mapSettings = mapSettings,
+            erosionSettings= nativeLayers,
+            brushRanges = brushRanges,
+            brushIndexOffsets = new(brushIndexOffsets.ToArray(),Allocator.TempJob),
+            brushWeights = new(brushWeights.ToArray(), Allocator.TempJob),
+            randomIndices= randomIndices,
+            heightMap = erosionResults
+        };
+
+        // var erosionCutter = new ErosionCutter
+        // {
+        //     mapSettings = mapSettings,
+        //     eroisonSettings = nativeLayers,
+        //     source = overSizedLayers,
+        //     destination = erosionResults
+        // };
+
+        return nativeLayers.Dispose(erosionJob.Schedule(randomIndices.Length,64, eroder));
     }
 
 
