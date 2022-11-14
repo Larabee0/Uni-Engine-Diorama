@@ -139,7 +139,7 @@ public struct CommonSettingsWrapper
     [Range(0.01f, 4f)]
     public float persistence;
     public float2 centre;
-    
+    [Range(-4f, 4f)]
     public float offsetValue;
 
     public BVC bvcSettings;
