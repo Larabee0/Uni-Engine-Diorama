@@ -108,7 +108,7 @@ public static class TerrainGenerator
                 targetLayer = allLayers.GetSubArray(i*heightMaps.result.Length, heightMaps.result.Length),
                 resultMap = heightMaps.result
             };
-            main = layerer.Schedule(heightMaps.result.Length, 64, main);
+            main = layerer.Schedule(heightMaps.result.Length,64, main);
             main.Complete();
         }
         relativeData.Dispose();
@@ -167,7 +167,7 @@ public static class TerrainGenerator
                 targetLayer = allLayers.GetSubArray(i * heightMaps.result.Length, heightMaps.result.Length),
                 resultMap = heightMaps.result
             };
-            main = layerer.Schedule(heightMaps.result.Length, 64, main);
+            main = layerer.Schedule(heightMaps.result.Length,64, main);
             main.Complete();
         }
         relativeData.Dispose();
@@ -193,7 +193,7 @@ public static class TerrainGenerator
             allHeightMaps = allLayers
         };
 
-        JobHandle main = noiseGenerator.Schedule(allLayers.Length, 64);
+        JobHandle main = noiseGenerator.Schedule(allLayers.Length, 448);
 
         NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
         main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
@@ -215,13 +215,14 @@ public static class TerrainGenerator
         {
             var layerer = new BigHeightMapLayerer
             {
+                layerIndex= i,
                 mapSettings = mapSettings,
                 heightMapRelative = relativeData,
                 baseLayer = allLayers.GetSubArray(0, resultHeightMap.Length),
                 targetLayer = allLayers.GetSubArray(i * resultHeightMap.Length, resultHeightMap.Length),
                 resultMap = resultHeightMap
             };
-            main = layerer.Schedule(resultHeightMap.Length, 64, main);
+            main = layerer.Schedule(resultHeightMap.Length,512, main);
             main.Complete();
         }
         relativeData.Dispose();
@@ -242,7 +243,7 @@ public static class TerrainGenerator
                 relativeNoiseData = relativeData,
                 allMaps = allLayers
             };
-            handle = colouringJob.Schedule(allLayers.Length, 64, handle);
+            handle = colouringJob.Schedule(allLayers.Length, 128, handle);
         }
         else if (mapSettings.shader == ShaderPicker.ABVC || mapSettings.shader == ShaderPicker.ABVCTextured)
         {
@@ -253,7 +254,7 @@ public static class TerrainGenerator
                 relativeNoiseData = relativeData,
                 allMaps = allLayers
             };
-            handle = colouringJob.Schedule(allLayers.Length, 64, handle);
+            handle = colouringJob.Schedule(allLayers.Length, 128, handle);
         }
         return handle;
     }
@@ -307,7 +308,7 @@ public static class TerrainGenerator
             commonSettings = commonSettings
         };
 
-        return heightMapClamper.Schedule(heightMap.Length, 64,handle);
+        return heightMapClamper.Schedule(heightMap.Length, 32,handle);
     }
 
 }

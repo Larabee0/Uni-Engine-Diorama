@@ -27,6 +27,7 @@ public struct ResultCopy : IJobParallelFor
 [BurstCompile]
 public struct BigHeightMapLayerer : IJobParallelFor
 {
+    public int layerIndex;
     public MeshAreaSettings mapSettings;
     [NativeDisableParallelForRestriction,ReadOnly]
     public NativeArray<RelativeNoiseData> heightMapRelative;
@@ -47,8 +48,9 @@ public struct BigHeightMapLayerer : IJobParallelFor
         float @base = baseLayer[index].Value; // always indexed from 0.
 
         float baseWeight = math.unlerp(heightMapRelative[0].minMax.x, heightMapRelative[0].minMax.y, @base);
+        float layerMin = heightMapRelative[layerIndex].minMax.x;
 
-        float mask = math.lerp(result.Value, result.Value + target.Value, baseWeight);
+        float mask = math.lerp(result.Value, result.Value + target.Value - layerMin, baseWeight);
 
         if (result.Value < mask)
         {

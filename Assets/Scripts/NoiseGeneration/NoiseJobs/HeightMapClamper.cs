@@ -65,7 +65,7 @@ public struct BigHeightMapClamper : IJobParallelFor
                 element.secondaryBlendMul = 1f - colourWeight;
             }
         }
-        element.Value = math.max(value, minValue) + zeroOffset + commonSettings[layerIndex].offsetValue;
+        element.Value = math.max(value, minValue- commonSettings[layerIndex].offsetValue) + zeroOffset;//+ commonSettings[layerIndex].offsetValue;
 
         HeightMap[index] = element;
     }
