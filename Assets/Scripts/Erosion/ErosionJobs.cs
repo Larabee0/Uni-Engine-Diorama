@@ -106,8 +106,10 @@ public struct ErodeJob : IJobParallelFor
                     int erodeIndex = dropletIndex + brushIndexOffsets[i];
 
                     float weightedErodeAmount = amountToErode * brushWeights[i];
-                    float deltaSediment = (map[erodeIndex] < weightedErodeAmount) ? map[erodeIndex] : weightedErodeAmount;
-                    map[erodeIndex] -= deltaSediment;
+                    float deltaSediment = (map[erodeIndex].Value < weightedErodeAmount) ? map[erodeIndex].Value : weightedErodeAmount;
+                    HeightMapElement erodeIndexElement = map[erodeIndex];
+                    erodeIndexElement.Value -= deltaSediment;
+                    map[erodeIndex] = erodeIndexElement;
                     sediment += deltaSediment;
                 }
             }
