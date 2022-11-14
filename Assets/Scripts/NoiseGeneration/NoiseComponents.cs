@@ -64,9 +64,10 @@ public struct NoiseSettings
     public LayerType layerType;
     public CommonSettingsWrapper basicSettings;
     public SimpleNoise SimpleNoise => new() { commonSettings = basicSettings };
-    public RigidNoise RigidNoise => new() { commonSettings = basicSettings, weightMultiplier = weightMultiplier };
-    [Tooltip("For Rigid Noise Only")]
+    public RigidNoise RigidNoise => new() { commonSettings = basicSettings, weightMultiplier = weightMultiplier,erosionSettings = erosionSettings };
+    [Header("For Rigid Noise Only")]
     public float weightMultiplier;
+    public ErodeSettings erosionSettings;
 }
 
 [Serializable]
@@ -98,6 +99,7 @@ public struct RigidNoise : IComponentData
     [HideInInspector]
     public CommonSettingsWrapper commonSettings;
     public float weightMultiplier;
+    public ErodeSettings erosionSettings;
 
 
     public bool ClampToFloor => commonSettings.clampToFloor;
@@ -182,3 +184,22 @@ public struct ABVC
     public float absolutelMaxHeight;
 }
 
+
+[System.Serializable]
+public struct ErodeSettings
+{
+    public int mapSize;
+    public int mapSizeWithBorder;
+    public float startWater;
+    public float startSpeed;
+    public int maxLifetime;
+    public float inertia;
+    public int erosionBrushRadius;
+    public float sedimentCapacityFactor;
+    public float minSedimentCapacity;
+    public float depositSpeed;
+    public float erodeSpeed;
+    public float gravity;
+    public float evaporateSpeed;
+    public uint baseSeed;
+}
