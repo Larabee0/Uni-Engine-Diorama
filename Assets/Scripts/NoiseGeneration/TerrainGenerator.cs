@@ -304,7 +304,7 @@ public static class TerrainGenerator
             mapSettings = mapSettings,
             relativeNoiseData = relativeData,
             HeightMap = heightMap,
-            colourWrappers = commonSettings
+            commonSettings = commonSettings
         };
 
         return heightMapClamper.Schedule(heightMap.Length, 64,handle);

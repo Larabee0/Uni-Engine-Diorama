@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor.Rendering;
 
 /// <summary>
 /// IConvertGameObjectToEntity gets called when a gameobject converts into an entity
