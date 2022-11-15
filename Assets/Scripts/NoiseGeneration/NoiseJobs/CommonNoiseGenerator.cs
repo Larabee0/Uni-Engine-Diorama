@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 
 [BurstCompile]
-public struct CommonNoiseGenerator : IJobParallelFor
+public struct CommonNoiseGenerator : IJobFor
 {
     [ReadOnly]
     public NativeArray<NoiseSettings> noiseSettings;
@@ -14,7 +14,10 @@ public struct CommonNoiseGenerator : IJobParallelFor
     public NativeArray<HeightMapElement> allHeightMaps;
     public void Execute(int index)
     {
-
+        if(index == 44062)
+        {
+            index = 44062;
+        }
         int mapArrayLength = areaSettings.mapDimentions.x * areaSettings.mapDimentions.y;
 
         int settingsIndex = index / mapArrayLength;
@@ -45,7 +48,7 @@ public struct CommonNoiseGenerator : IJobParallelFor
     {
         HeightMapElement element = allHeightMaps[index];
         float2 percent = xy / (settings.Resolution - 1);
-        float noiseValue = element.Value;
+        float noiseValue = element.Value = 0;
         float frequency = settings.BaseRoughness;
         float amplitude = 1;
 
@@ -66,7 +69,7 @@ public struct CommonNoiseGenerator : IJobParallelFor
     {
         HeightMapElement element = allHeightMaps[index];
         float2 percent = xy / (settings.Resolution - 1);
-        float noiseValue = element.Value;
+        float noiseValue = element.Value = 0;
         float frequency = settings.BaseRoughness;
         float amplitude = 1;
         float weight = 1;

@@ -21,6 +21,7 @@ public struct MeshAreaSettings : IComponentData
 {
     public int2 mapDimentions;
     public ShaderPicker shader;
+    public ErosionMode erosionMode;
     public int2 textureTiling;
     [Range(0f, 1f)]
     public float floorPercentage;

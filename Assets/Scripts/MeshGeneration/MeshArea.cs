@@ -62,15 +62,22 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
         for (int i = 0; i < noiseLayers.Length; i++)
         {
-            if (noiseLayers[i].basicSettings.seed < 1)
+            if (noiseLayers[i].erosionSettings.baseSeed < 1)
             {
-                noiseLayers[i].basicSettings.seed = 1;
+                noiseLayers[i].erosionSettings.baseSeed = 1;
             }
         }
 
         // TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
-
-        TerrainGenerator.GenerateCommonErosion(noiseLayers, mapSettings, result);
+        if(mapSettings.erosionMode == ErosionMode.PerHeightMap)
+        {
+            TerrainGenerator.GenerateCommonPerMapErosion(noiseLayers, mapSettings, result);
+        }
+        else
+        {
+            TerrainGenerator.GenerateCommonErosion(noiseLayers, mapSettings, result);
+        }
+        
 
         // baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);

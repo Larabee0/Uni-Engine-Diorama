@@ -2,8 +2,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Jobs;
 using Unity.Burst;
-using UnityEditor;
-using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 
 /// <summary>
 /// Original Alogirthim Designed for 1 square height map at once
@@ -12,8 +10,6 @@ using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 [BurstCompile]
 public struct ErodeJob : IJobParallelFor
 {
-    public int2 mapSize;
-    public int2 fullMapSize;
     public ErodeSettings settings;
 
     [ReadOnly]
@@ -29,15 +25,15 @@ public struct ErodeJob : IJobParallelFor
         int2 min = new(settings.erosionBrushRadius);
         int2 max = new()
         {
-            x = mapSize.x + settings.erosionBrushRadius,
-            y = mapSize.y + settings.erosionBrushRadius
+            x = settings.mapSize.x + settings.erosionBrushRadius,
+            y = settings.mapSize.y + settings.erosionBrushRadius
         };
 
         int2 random = prng.NextInt2(min, max);
-        int index = random.y * mapSize.x + random.x;
+        int index = random.y * settings.mapSize.x + random.x;
 
-        float posX = (float)index % settings.mapSizeWithBorder;
-        float posY = (float)index / settings.mapSizeWithBorder;
+        float posX = (float)index % settings.mapSizeWithBorder.x;
+        float posY = (float)index / settings.mapSizeWithBorder.x;
         float dirX = 0;
         float dirY = 0;
         float speed = settings.startSpeed;
@@ -48,7 +44,7 @@ public struct ErodeJob : IJobParallelFor
         {
             int nodeX = (int)posX;
             int nodeY = (int)posY;
-            int dropletIndex = nodeY * settings.mapSizeWithBorder + nodeX;
+            int dropletIndex = nodeY * settings.mapSizeWithBorder.x + nodeX;
             // Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
             float cellOffsetX = posX - nodeX;
             float cellOffsetY = posY - nodeY;
@@ -69,9 +65,9 @@ public struct ErodeJob : IJobParallelFor
             // Stop simulating droplet if it's not moving or has flowed over edge of map
             if ((dirX == 0 && dirY == 0) || 
                 posX < settings.erosionBrushRadius || 
-                posX > fullMapSize.x - settings.erosionBrushRadius || 
+                posX > settings.mapSizeWithBorder.x - settings.erosionBrushRadius || 
                 posY < settings.erosionBrushRadius || 
-                posY > fullMapSize.y - settings.erosionBrushRadius)
+                posY > settings.mapSizeWithBorder.y - settings.erosionBrushRadius)
             {
                 break;
             }
@@ -94,8 +90,8 @@ public struct ErodeJob : IJobParallelFor
                 // Deposition is not distributed over a radius (like erosion) so that it can fill small pits
                 HeightMapElement dropletElement = heightMap[dropletIndex];
                 HeightMapElement dropletElementPlusOne = heightMap[dropletIndex + 1];
-                HeightMapElement dropletElementBorder = heightMap[dropletIndex + settings.mapSizeWithBorder];
-                HeightMapElement dropletElementBorderPlusOne = heightMap[dropletIndex + settings.mapSizeWithBorder + 1];
+                HeightMapElement dropletElementBorder = heightMap[dropletIndex + settings.mapSizeWithBorder.x];
+                HeightMapElement dropletElementBorderPlusOne = heightMap[dropletIndex + settings.mapSizeWithBorder.x + 1];
 
                 dropletElement.Value += amountToDeposit * (1 - cellOffsetX) * (1 - cellOffsetY);
                 dropletElementPlusOne.Value += amountToDeposit * cellOffsetX * (1 - cellOffsetY);
@@ -104,8 +100,8 @@ public struct ErodeJob : IJobParallelFor
 
                 heightMap[dropletIndex] = dropletElement;
                 heightMap[dropletIndex + 1] = dropletElementPlusOne;
-                heightMap[dropletIndex + settings.mapSizeWithBorder] = dropletElementBorder;
-                heightMap[dropletIndex + settings.mapSizeWithBorder + 1] = dropletElementBorderPlusOne;
+                heightMap[dropletIndex + settings.mapSizeWithBorder.x] = dropletElementBorder;
+                heightMap[dropletIndex + settings.mapSizeWithBorder.x + 1] = dropletElementBorderPlusOne;
             }
             else
             {
@@ -142,11 +138,11 @@ public struct ErodeJob : IJobParallelFor
         float y = posY - coordY;
 
         // Calculate heights of the four nodes of the droplet's cell
-        int nodeIndexNW = coordY * settings.mapSizeWithBorder + coordX;
+        int nodeIndexNW = coordY * settings.mapSizeWithBorder.x + coordX;
         float heightNW = heightMap[nodeIndexNW].Value;
         float heightNE = heightMap[nodeIndexNW + 1].Value;
-        float heightSW = heightMap[nodeIndexNW + settings.mapSizeWithBorder].Value;
-        float heightSE = heightMap[nodeIndexNW + settings.mapSizeWithBorder + 1].Value;
+        float heightSW = heightMap[nodeIndexNW + settings.mapSizeWithBorder.x].Value;
+        float heightSE = heightMap[nodeIndexNW + settings.mapSizeWithBorder.x + 1].Value;
 
         // Calculate droplet's direction of flow with bilinear interpolation of height difference along the edges
         float gradientX = (heightNE - heightNW) * (1 - y) + (heightSE - heightSW) * y;
@@ -190,15 +186,11 @@ public struct BigErodeJob : IJobParallelFor
         NativeArray<int> brushIndexOffsetsInternal = brushIndexOffsets.GetSubArray(brushRanges[rEE.layerIndex].x, brushRanges[rEE.layerIndex].y);
         NativeArray<float> brushWeightsInternal = brushWeights.GetSubArray(brushRanges[rEE.layerIndex].x, brushRanges[rEE.layerIndex].y);
 
-        int fullSizeWidth = mapSettings.mapDimentions.x + settings.erosionBrushRadius*2 + settings.borderOffset*2;
-        // int fullSizeHeight = mapSettings.mapDimentions.y + settings.erosionBrushRadius + settings.borderOffset;
-
-
-        int localIndexOffset = rEE.layerIndex * settings.mapSizeWithBorder;
+        int localIndexOffset = rEE.layerIndex * settings.mapSizeWithBorder.x;
 
         int elementIndex = rEE.heightMapElementIndex;
-        float posX = (float)(elementIndex - localIndexOffset) % settings.mapSizeWithBorder;
-        float posY = (float)(elementIndex - localIndexOffset) / settings.mapSizeWithBorder;
+        float posX = (float)(elementIndex - localIndexOffset) % settings.mapSizeWithBorder.x;
+        float posY = (float)(elementIndex - localIndexOffset) / settings.mapSizeWithBorder.x;
         float dirX = 0;
         float dirY = 0;
         float speed = settings.startSpeed;
@@ -209,12 +201,12 @@ public struct BigErodeJob : IJobParallelFor
         {
             int nodeX = (int)posX;
             int nodeY = (int)posY;
-            int dropletIndex = nodeY * settings.mapSizeWithBorder + nodeX;
+            int dropletIndex = nodeY * settings.mapSizeWithBorder.x + nodeX;
 
             float cellOffsetX = posX - nodeX;
             float cellOffsetY = posY - nodeY;
 
-            float3 heightAndGradient = CalculateHeightAndGradient(settings.mapSizeWithBorder,localIndexOffset, posX, posY);
+            float3 heightAndGradient = CalculateHeightAndGradient(settings.mapSizeWithBorder.x, localIndexOffset, posX, posY);
 
             dirX = dirX * settings.inertia - heightAndGradient.x * (1 - settings.inertia);
             dirY = dirY * settings.inertia - heightAndGradient.y * (1 - settings.inertia);
@@ -230,7 +222,7 @@ public struct BigErodeJob : IJobParallelFor
             }
 
 
-            float newHeight = CalculateHeightAndGradient(settings.mapSizeWithBorder, localIndexOffset, posX, posY).z;
+            float newHeight = CalculateHeightAndGradient(settings.mapSizeWithBorder.x, localIndexOffset, posX, posY).z;
             float deltaHeight = newHeight - heightAndGradient.z;
 
             float sedimentCapacity = math.max(-deltaHeight * speed * water * settings.sedimentCapacityFactor, settings.minSedimentCapacity);
@@ -243,16 +235,16 @@ public struct BigErodeJob : IJobParallelFor
 
                 HeightMapElement e0 = heightMap[dropletIndex];
                 HeightMapElement e1 = heightMap[dropletIndex + 1];
-                HeightMapElement e2 = heightMap[dropletIndex+ settings.mapSizeWithBorder];
-                HeightMapElement e3 = heightMap[dropletIndex + settings.mapSizeWithBorder + 1];
+                HeightMapElement e2 = heightMap[dropletIndex+ settings.mapSizeWithBorder.x];
+                HeightMapElement e3 = heightMap[dropletIndex + settings.mapSizeWithBorder.x + 1];
                 e0.Value += amountToDeposit * (1 - cellOffsetX) * (1 - cellOffsetY);
                 e1.Value += amountToDeposit * cellOffsetX * (1 - cellOffsetY);
                 e2.Value += amountToDeposit * (1 - cellOffsetX) * cellOffsetY;
                 e3.Value += amountToDeposit * cellOffsetX * cellOffsetY;
                 heightMap[dropletIndex] = e0;
                 heightMap[dropletIndex + 1] = e1;
-                heightMap[dropletIndex + settings.mapSizeWithBorder] = e2;
-                heightMap[dropletIndex + settings.mapSizeWithBorder + 1 ]= e3;
+                heightMap[dropletIndex + settings.mapSizeWithBorder.x] = e2;
+                heightMap[dropletIndex + settings.mapSizeWithBorder.x + 1 ]= e3;
             }
             else
             {
@@ -261,7 +253,10 @@ public struct BigErodeJob : IJobParallelFor
                 for (int i = 0; i < brushIndexOffsetsInternal.Length; i++)
                 {
                     int erodeIndex = dropletIndex + brushIndexOffsetsInternal[i] + localIndexOffset;
-
+                    if(erodeIndex < 0)
+                    {
+                        continue;
+                    }
                     float weightedErodeAmount = amountToErode * brushWeightsInternal[i];
                     float deltaSediment = (heightMap[erodeIndex].Value < weightedErodeAmount) ? heightMap[erodeIndex].Value : weightedErodeAmount;
 
@@ -327,12 +322,12 @@ public struct RandomIndexGenerator : IJobParallelFor
         }
         ErodeSettings settings = eroisonSettings[layerIndex].erosionSettings;
 
-        Random prng = new(settings.baseSeed + (uint)settings.erosionIterations - (uint)index);
+        Random prng = new(settings.baseSeed + ((uint)index - (uint)layerStartIndices[layerIndex]));
         int2 min = new(settings.erosionBrushRadius);
         int2 max = new()
         {
-            x = mapSettings.mapDimentions.x + settings.erosionBrushRadius + settings.borderOffset,
-            y = mapSettings.mapDimentions.y + settings.erosionBrushRadius + settings.borderOffset
+            x = mapSettings.mapDimentions.x + settings.erosionBrushRadius,
+            y = mapSettings.mapDimentions.y + settings.erosionBrushRadius
         };
         int2 randomXY = prng.NextInt2(min, max);
         randomIndices[index] =new( randomXY.y * mapSettings.mapDimentions.x +randomXY.x,layerIndex);
@@ -359,7 +354,7 @@ public struct ErosionCombiner : IJobFor
     {
         int mapArrayLength = mapSettings.mapDimentions.x * mapSettings.mapDimentions.y;
         int layerIndex = index / mapArrayLength;
-        if (noiseSettings[layerIndex].layerType == LayerType.Rigid && noiseSettings[layerIndex].erosionSettings.erosion)
+        if (noiseSettings[layerIndex].erosionSettings.erosion)
         {
             ErodeSettings settings = noiseSettings[layerIndex].erosionSettings;
 
@@ -373,7 +368,7 @@ public struct ErosionCombiner : IJobFor
             int widthWithBorder = mapSettings.mapDimentions.x + settings.erosionBrushRadius * 2;
 
             int sourceIndex = (dstXY.y + settings.erosionBrushRadius) * widthWithBorder + dstXY.x +  settings.erosionBrushRadius;
-            sourceIndex += erosionSettingsIndexRemap[layerIndex] * settings.mapSizeWithBorder;
+            sourceIndex += erosionSettingsIndexRemap[layerIndex] * settings.mapSizeWithBorder.x;
             destination[index] = source[sourceIndex];
         }
     }
@@ -418,7 +413,7 @@ public struct ErosionCutter : IJobFor
 
         int sourceIndex = (dstXY.y + eroisonSettings.erosionBrushRadius) * widthWithBorder + dstXY.x + eroisonSettings.erosionBrushRadius;
 
-        sourceIndex += settingsIndex * eroisonSettings.mapSizeWithBorder;
+        sourceIndex += settingsIndex * eroisonSettings.mapSizeWithBorder.x;
         destination[index] = source[sourceIndex];
     }
 }

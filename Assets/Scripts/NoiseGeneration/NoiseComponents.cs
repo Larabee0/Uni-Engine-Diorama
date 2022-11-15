@@ -17,6 +17,12 @@ public enum ShaderPicker
     ABVCTextured
 }
 
+public enum ErosionMode
+{
+    PerHeightMap,
+    GlobalPostBake
+}
+
 public struct SimpleHeightMapWrapper
 {
     public SimpleNoise simpleNoise;
@@ -124,7 +130,6 @@ public struct RigidNoise : IComponentData
 [Serializable]
 public struct CommonSettingsWrapper
 {
-    public uint seed;
     public bool clampToFloor;
     [Range(0f, 1f)]
     public float floorPercentage;
@@ -194,11 +199,15 @@ public struct ErodeSettings
     public uint baseSeed;
     public int erosionIterations;
     [HideInInspector]
-    public int mapSize;
+    public int2 mapSize;
     [HideInInspector]
-    public int mapSizeWithBorder;
+    public int2 mapSizeWithBorder;
     [HideInInspector]
-    public int borderOffset;
+    public int largestBrush;
+    public int LargestPlusRadius => largestBrush + erosionBrushRadius;
+    public int LargestMinusRadius => largestBrush - erosionBrushRadius;
+    public int RadiusMinusLargest => erosionBrushRadius- largestBrush;
+
     [Range(2, 8)]
     public int erosionBrushRadius;
     [Range(0, 1)]
