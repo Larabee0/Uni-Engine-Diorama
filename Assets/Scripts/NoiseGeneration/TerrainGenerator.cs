@@ -176,8 +176,108 @@ public static class TerrainGenerator
         settingWrappers.Dispose();
         allLayers.Dispose();
     }
+    public static void GenerateCommonErosion(NoiseSettings[] noiseSettings, MeshAreaSettings mapSettings, NativeArray<HeightMapElement> resultHeightMap)
+    {
+        NativeArray<NoiseSettings> nativeLayers = new(noiseSettings, Allocator.TempJob);
+        NativeArray<CommonSettingsWrapper> commonSettingWrappers = new(noiseSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        int2 finalMapSize = mapSettings.mapDimentions;
 
-    public static void GenerateCommonMaps(NoiseSettings[] noiseSettings, MeshAreaSettings mapSettings,NativeArray<HeightMapElement> resultHeightMap)
+        if (noiseSettings[0].erosionSettings.erosion)
+        {
+            int brushRadius = noiseSettings[0].erosionSettings.erosionBrushRadius * 2;
+            mapSettings.mapDimentions = new(mapSettings.mapDimentions.x + brushRadius, mapSettings.mapDimentions.y + brushRadius);
+        }
+        
+        NativeArray<HeightMapElement> allLayers = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y * noiseSettings.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+        NativeParallelHashSet<int> excludedLayers = new(noiseSettings.Length, Allocator.TempJob);
+        for (int i = 0; i < nativeLayers.Length; i++)
+        {
+            commonSettingWrappers[i] = noiseSettings[i].basicSettings;
+        }
+
+        var noiseGenerator = new CommonNoiseGenerator
+        {
+            areaSettings = mapSettings,
+            noiseSettings = nativeLayers,
+            allHeightMaps = allLayers,
+            excludeLayers = excludedLayers,
+        };
+
+        JobHandle main = noiseGenerator.Schedule(allLayers.Length, 448);
+
+        NativeArray<RelativeNoiseData> relativeData = new(nativeLayers.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
+
+        main = BigColourHeightMap(main, mapSettings, allLayers, commonSettingWrappers, relativeData);
+
+        main = BigClampToFlatFloor(main, allLayers, mapSettings, commonSettingWrappers, relativeData);
+
+        main = BigCalculateRelativeNoiseData(main, mapSettings, relativeData, commonSettingWrappers, allLayers);
+
+        NativeArray<HeightMapElement> preErosinoResult = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+        var resultCopy = new ResultCopy
+        {
+            allLayers = allLayers.GetSubArray(0, preErosinoResult.Length),
+            result = preErosinoResult
+        };
+
+        main = resultCopy.Schedule(preErosinoResult.Length, 128, main);
+
+        for (int i = 1; i < noiseSettings.Length; i++)
+        {
+            var layerer = new BigHeightMapLayerer
+            {
+                layerIndex = i,
+                mapSettings = mapSettings,
+                heightMapRelative = relativeData,
+                baseLayer = allLayers.GetSubArray(0, preErosinoResult.Length),
+                targetLayer = allLayers.GetSubArray(i * preErosinoResult.Length, preErosinoResult.Length),
+                resultMap = preErosinoResult
+            };
+            main = layerer.Schedule(preErosinoResult.Length, 512, main);
+            main.Complete();
+        }
+
+        if (noiseSettings[0].erosionSettings.erosion)
+        {
+            ErodeSettings erosionSettings = noiseSettings[0].erosionSettings;
+            erosionSettings.mapSizeWithBorder = finalMapSize.x + erosionSettings.erosionBrushRadius * 2;
+            erosionSettings.mapSize = finalMapSize.x*finalMapSize.y;
+            erosionSettings.baseSeed = noiseSettings[0].basicSettings.seed;
+            main = Erosion.Erode(preErosinoResult, mapSettings,finalMapSize, erosionSettings, default);
+
+            mapSettings.mapDimentions = finalMapSize;
+
+            var cutter = new ErosionCutter
+            {
+                mapSettings = mapSettings,
+                eroisonSettings = erosionSettings,
+                source = preErosinoResult,
+                destination= resultHeightMap
+
+            };
+            cutter.ScheduleParallel(resultHeightMap.Length, 64, main).Complete();
+        }
+        else
+        {
+            var resultCopy2 = new ResultCopy
+            {
+                allLayers = preErosinoResult,
+                result = resultHeightMap
+            };
+            preErosinoResult.Dispose(resultCopy2.Schedule(preErosinoResult.Length, 64, main)).Complete();
+        }
+
+        excludedLayers.Dispose();
+        relativeData.Dispose();
+        commonSettingWrappers.Dispose();
+        nativeLayers.Dispose();
+        allLayers.Dispose();
+    }
+
+    public static void GenerateCommonPerMapErosion(NoiseSettings[] noiseSettings, MeshAreaSettings mapSettings,NativeArray<HeightMapElement> resultHeightMap)
     {
         NativeArray<NoiseSettings> nativeLayers = new(noiseSettings, Allocator.TempJob);
         NativeArray<CommonSettingsWrapper> commonSettingWrappers = new(noiseSettings.Length, Allocator.TempJob,NativeArrayOptions.UninitializedMemory);

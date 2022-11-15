@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class Erosion
 {
-    public static JobHandle Erode(NativeArray<HeightMapElement> heightMap,int numErosionIterations, ErodeSettings settings, JobHandle dependency)
+    public static JobHandle Erode(NativeArray<HeightMapElement> heightMap,MeshAreaSettings mapSettings,int2 finalMapSize, ErodeSettings settings, JobHandle dependency)
     {
         NativeList<int> brushIndexOffsets = new(settings.erosionBrushRadius * settings.erosionBrushRadius, Allocator.TempJob);
         NativeList<float> brushWeights = new(settings.erosionBrushRadius * settings.erosionBrushRadius, Allocator.TempJob);
@@ -36,12 +36,14 @@ public static class Erosion
 
         var erodeJob = new ErodeJob
         {
+            mapSize = finalMapSize,
+            fullMapSize = mapSettings.mapDimentions,
             settings = settings,
             brushIndexOffsets = brushIndexOffsets,
             brushWeights = brushWeights,
             heightMap = heightMap
         };
 
-        return erodeJob.Schedule(numErosionIterations, 64, dependency);
+        return brushIndexOffsets.Dispose(brushWeights.Dispose(erodeJob.Schedule(settings.erosionIterations, 64, dependency)));
     }
 }

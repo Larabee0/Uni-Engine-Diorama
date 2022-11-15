@@ -3,6 +3,7 @@ using Unity.Mathematics;
 using Unity.Jobs;
 using Unity.Burst;
 using UnityEditor;
+using static UnityEngine.Experimental.Rendering.RayTracingAccelerationStructure;
 
 /// <summary>
 /// Original Alogirthim Designed for 1 square height map at once
@@ -11,12 +12,12 @@ using UnityEditor;
 [BurstCompile]
 public struct ErodeJob : IJobParallelFor
 {
+    public int2 mapSize;
+    public int2 fullMapSize;
     public ErodeSettings settings;
 
     [ReadOnly]
     public NativeList<int> brushIndexOffsets;
-    [ReadOnly]
-    public NativeParallelHashSet<int> possibleTargets;
     [ReadOnly]
     public NativeList<float> brushWeights;
     [NativeDisableParallelForRestriction]
@@ -25,14 +26,16 @@ public struct ErodeJob : IJobParallelFor
     public void Execute(int iteration)
     {
         Random prng = new(settings.baseSeed + (uint)iteration);
-
-        int2 random = prng.NextInt2(settings.erosionBrushRadius, settings.mapSize + settings.erosionBrushRadius);
-        int index = random.y * settings.mapSize + random.x;
-        while (!possibleTargets.Contains(index))
+        int2 min = new(settings.erosionBrushRadius);
+        int2 max = new()
         {
-            random = prng.NextInt2(settings.erosionBrushRadius, settings.mapSize + settings.erosionBrushRadius);
-            index = random.y * settings.mapSize + random.x;
-        }
+            x = mapSize.x + settings.erosionBrushRadius,
+            y = mapSize.y + settings.erosionBrushRadius
+        };
+
+        int2 random = prng.NextInt2(min, max);
+        int index = random.y * mapSize.x + random.x;
+
         float posX = (float)index % settings.mapSizeWithBorder;
         float posY = (float)index / settings.mapSizeWithBorder;
         float dirX = 0;
@@ -64,7 +67,11 @@ public struct ErodeJob : IJobParallelFor
             posY += dirY;
 
             // Stop simulating droplet if it's not moving or has flowed over edge of map
-            if ((dirX == 0 && dirY == 0) || posX < settings.erosionBrushRadius || posX > settings.mapSizeWithBorder - settings.erosionBrushRadius || posY < settings.erosionBrushRadius || posY > settings.mapSizeWithBorder - settings.erosionBrushRadius)
+            if ((dirX == 0 && dirY == 0) || 
+                posX < settings.erosionBrushRadius || 
+                posX > fullMapSize.x - settings.erosionBrushRadius || 
+                posY < settings.erosionBrushRadius || 
+                posY > fullMapSize.y - settings.erosionBrushRadius)
             {
                 break;
             }
@@ -391,8 +398,7 @@ public struct ErosionCutter : IJobFor
 {
     public MeshAreaSettings mapSettings;
 
-    [ReadOnly, DeallocateOnJobCompletion]
-    public NativeArray<NoiseSettings> eroisonSettings;
+    public ErodeSettings eroisonSettings;
 
     [ReadOnly, DeallocateOnJobCompletion]
     public NativeArray<HeightMapElement> source;
@@ -403,15 +409,16 @@ public struct ErosionCutter : IJobFor
     {
         int mapArrayLength = mapSettings.mapDimentions.x * mapSettings.mapDimentions.y;
         int settingsIndex = index / mapArrayLength;
-        ErodeSettings settings = eroisonSettings[settingsIndex].erosionSettings;
-        int localOffset = settingsIndex * mapArrayLength;
         int2 dstXY = new()
         {
-            x = (index - localOffset) % mapSettings.mapDimentions.x,
-            y = (index - localOffset) / mapSettings.mapDimentions.x
+            x = index % mapSettings.mapDimentions.x,
+            y = index  / mapSettings.mapDimentions.x
         };
-        int sourceIndex = (dstXY.y + settings.borderOffset + settings.erosionBrushRadius) * mapSettings.mapDimentions.x + settings.borderOffset + settings.erosionBrushRadius + dstXY.x + settings.borderOffset + settings.erosionBrushRadius;
-        sourceIndex += settingsIndex * settings.mapSizeWithBorder;
+        int widthWithBorder = mapSettings.mapDimentions.x + eroisonSettings.erosionBrushRadius * 2;
+
+        int sourceIndex = (dstXY.y + eroisonSettings.erosionBrushRadius) * widthWithBorder + dstXY.x + eroisonSettings.erosionBrushRadius;
+
+        sourceIndex += settingsIndex * eroisonSettings.mapSizeWithBorder;
         destination[index] = source[sourceIndex];
     }
 }

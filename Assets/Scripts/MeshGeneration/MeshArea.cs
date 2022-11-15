@@ -70,7 +70,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
 
         // TerrainGenerator.GenerateSimpleMapsBigArray(noiseLayers, new(mapSettings, baseMap, result, true));
 
-        TerrainGenerator.GenerateCommonMaps(noiseLayers, mapSettings, result);
+        TerrainGenerator.GenerateCommonErosion(noiseLayers, mapSettings, result);
 
         // baseMap.Dispose();
         Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
