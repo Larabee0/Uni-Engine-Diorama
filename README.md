@@ -53,3 +53,7 @@ Create a water shader to allow lake formations to be created
 - Conversion into the C# Jobs system for both of these projects was undertaken souly by myself as is the mesh generation Job.
 - Terrain Shaders (Shader Graph) are based off the HLSL shaders in the Hydraulic Erosion repo by Sebastian Lague.
 - These have been converted to shader graph by myself and then signficiantly modified to support multiple colours, colour blending, textures & texture blendingk, based off information provided in the mesh vertex colour channels and UV channels and through a supplimentary data texture.
+
+# Project License
+Other repos used in the creation of this Repo are licensed under the MIT license, under this license pretty much anymore can take work I created here and modify it anyway, redistrubute it how the like, make a closed source version or roll it into a GNU GPL v3 project.
+This is how I wish for my work to be used by third parties if they wish to, I don't mind if they make an improvment and don't publish it for this project in particular, as its a small "my first unity" project to demonstrate I can use the engine. So therefore Under the MIT license they can use it if they want but have no obligations to republish it.
