@@ -192,7 +192,7 @@ public struct ABVC
 }
 
 
-[System.Serializable]
+[Serializable]
 public struct ErodeSettings
 {
     public bool erosion;

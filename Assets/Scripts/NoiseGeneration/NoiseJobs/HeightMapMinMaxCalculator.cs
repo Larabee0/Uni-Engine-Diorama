@@ -1,4 +1,3 @@
-using Cinemachine;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -30,6 +29,7 @@ public struct HeightMapMinMaxCal : IJob
 [BurstCompile]
 public struct BigHeightMapMinMaxCal : IJobParallelFor
 {
+    public bool IgnoreUnClamped;
     public MeshAreaSettings mapSettings;
     public NativeArray<RelativeNoiseData> minMax;
 
@@ -39,6 +39,10 @@ public struct BigHeightMapMinMaxCal : IJobParallelFor
     public NativeArray<HeightMapElement> HeightMap;
     public void Execute(int index)
     {
+        if (!commonSettings[index].clampToFloor && IgnoreUnClamped)
+        {
+            return;
+        }
         int layerSize = mapSettings.mapDimentions.x * mapSettings.mapDimentions.y;
         int startIndex = index * layerSize;
         int endIndex = startIndex+layerSize;

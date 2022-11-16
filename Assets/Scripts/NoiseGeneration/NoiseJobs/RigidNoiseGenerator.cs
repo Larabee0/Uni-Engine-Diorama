@@ -3,8 +3,8 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-// Rigid Noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
-// adapted for 2D height map generation and C# Jobs by myself
+// Rigid Noise algorithim take from https://github.com/SebLague/Procedural-Planets/blob/master/Procedural%20Planet%20E07/RidgidNoiseFilter.cs
+// under the MIT licence adapted for 2D height map generation and C# Jobs by myself
 
 [BurstCompile]
 public struct BigRigidNoiseHeightMapGenerator : IJobParallelFor

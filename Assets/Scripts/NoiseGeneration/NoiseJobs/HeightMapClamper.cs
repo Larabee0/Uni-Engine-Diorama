@@ -3,8 +3,11 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Cinemachine;
 
+/// <summary>
+/// values below a certain minimum in relativeData are clamped to the minimum to produce a flat floor or water level
+/// This clamps all heights maps that are set to be clamped in their settings.
+/// </summary>
 [BurstCompile]
 public struct BigHeightMapClamper : IJobParallelFor
 {

@@ -3,8 +3,8 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-// Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets under the MIT licence
-// adapted for 2D height map generation and C# Jobs by myself
+// Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets/blob/master/Procedural%20Planet%20E07/SimpleNoiseFilter.cs
+// under the MIT licence adapted for 2D height map generation and C# Jobs by myself
 [BurstCompile]
 public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 {
@@ -37,7 +37,8 @@ public struct SimpleNoiseHeightMapGenerator : IJobParallelFor
 
 
 /// <summary>
-/// theoretically capable of generating all simple layers at once
+/// Modified version of the above Job
+/// capable of generating all simple layers at once
 /// </summary>
 [BurstCompile]
 public struct BigSimpleNoiseHeightMapGenerator : IJobParallelFor

@@ -14,10 +14,6 @@ public struct CommonNoiseGenerator : IJobFor
     public NativeArray<HeightMapElement> allHeightMaps;
     public void Execute(int index)
     {
-        if(index == 44062)
-        {
-            index = 44062;
-        }
         int mapArrayLength = areaSettings.mapDimentions.x * areaSettings.mapDimentions.y;
 
         int settingsIndex = index / mapArrayLength;
@@ -44,6 +40,8 @@ public struct CommonNoiseGenerator : IJobFor
         };
     }
 
+    // Simple noise algorithim take from https://github.com/SebLague/Procedural-Planets/blob/master/Procedural%20Planet%20E07/SimpleNoiseFilter.cs
+    // under the MIT licence adapted for 2D height map generation and C# Jobs by myself
     private HeightMapElement SimpleNoiseGenerator(int index, float2 xy , SimpleNoise settings)
     {
         HeightMapElement element = allHeightMaps[index];
@@ -65,6 +63,8 @@ public struct CommonNoiseGenerator : IJobFor
         return element;
     }
 
+    // Rigid Noise algorithim take from https://github.com/SebLague/Procedural-Planets/blob/master/Procedural%20Planet%20E07/RidgidNoiseFilter.cs
+    // under the MIT licence adapted for 2D height map generation and C# Jobs by myself
     private HeightMapElement RigidNoiseGenerator(int index, float2 xy, RigidNoise settings)
     {
         HeightMapElement element = allHeightMaps[index];

@@ -5,12 +5,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 
 /// <summary>
-/// Job takes 2 height maps, and combines them together into one result
-/// Currently this is weighted by the first height map,
-/// closer to the ceiling of HM1 increases the weight to 1f for HM2
-/// closer to the floor of HM1 lowers the weight to 0f for HM2
+/// Parallised Array copying? Yes.
 /// </summary>
-
 [BurstCompile]
 public struct ResultCopy : IJobParallelFor
 {
@@ -24,6 +20,9 @@ public struct ResultCopy : IJobParallelFor
     }
 }
 
+/// <summary>
+/// Job takes 2 height maps, and combines them together into one result.
+/// </summary>
 [BurstCompile]
 public struct BigHeightMapLayerer : IJobParallelFor
 {

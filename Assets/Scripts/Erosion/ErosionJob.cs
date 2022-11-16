@@ -4,8 +4,11 @@ using Unity.Jobs;
 using Unity.Burst;
 
 /// <summary>
-/// Original Alogirthim Designed for 1 square height map at once
-/// Converted from Compute shader to run in C# Jobs.
+/// Original Alogirthim Designed for 1 square height map at once.
+/// Modified by me to support none cubic maps.
+/// Converted from Compute shader to run in C# Jobs by me under MIT license.
+/// For original compute shader and manage C# version see the original source;
+/// https://github.com/SebLague/Hydraulic-Erosion
 /// </summary>
 [BurstCompile]
 public struct ErodeJob : IJobParallelFor
@@ -157,7 +160,8 @@ public struct ErodeJob : IJobParallelFor
 
 
 /// <summary>
-/// Majorly modified alogirthim designed for multuple height maps at once, supporting none cubic sizes.
+/// A majorly modified version of the alogirthim above
+/// designed for multiple height maps at once, supporting none cubic sizes.
 /// </summary>
 [BurstCompile]
 public struct BigErodeJob : IJobParallelFor
