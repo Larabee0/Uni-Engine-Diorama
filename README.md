@@ -44,12 +44,12 @@ Create a water shader to allow lake formations to be created
 - Terrain pattern Textures take from "FREE Stylized PBR Textures Pack" https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
 - Air Ship Textures take from "FREE Stylized PBR Textures Pack" https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
  and "Yughues Free Metal Materials" https://assetstore.unity.com/packages/2d/textures-materials/metals/yughues-free-metal-materials-12949
-Both textures packs are free under the Unity Extension Asset licience granting use per user.
-The airship model itself was made by me in blender.
+- Both textures packs are free under the Unity Extension Asset licience granting use per user.
+- The airship model itself was made by me in blender.
 ## Tech
 - Original Noise Generation alogrithims were written by Sebastian Lague and released under the MIT License https://github.com/SebLague/Procedural-Planets
 - Original Hydraulic Erosion alogrithim was written by Sebastian Lague and released under the MIT License https://github.com/SebLague/Hydraulic-Erosion
-These algorithims are clearly stated and sourced in the code files they are relevant to in the latest commit.
-Conversion into the C# Jobs system for both of these projects was undertaken souly by myself as is the mesh generation Job.
+- These algorithims are clearly stated and sourced in the code files they are relevant to in the latest commit.
+- Conversion into the C# Jobs system for both of these projects was undertaken souly by myself as is the mesh generation Job.
 - Terrain Shaders (Shader Graph) are based off the HLSL shaders in the Hydraulic Erosion repo by Sebastian Lague.
-These have been converted to shader graph by myself and then signficiantly modified to support multiple colours, colour blending, textures & texture blendingk, based off information provided in the mesh vertex colour channels and UV channels and through a supplimentary data texture.
+- These have been converted to shader graph by myself and then signficiantly modified to support multiple colours, colour blending, textures & texture blendingk, based off information provided in the mesh vertex colour channels and UV channels and through a supplimentary data texture.
