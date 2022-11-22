@@ -30,6 +30,8 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private NoiseSettings firstNoiseLayer;
     public NoiseSettings FirstNoiseLayer => firstNoiseLayer;
     [SerializeField] private NoiseSettings[] noiseLayers;
+    public NoiseSettings[] NoiseLayers => noiseLayers;
+
 
     [SerializeField] private bool UpdateOnChange;
 
@@ -100,6 +102,35 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
         GenerateHeightMapMesh(result);
         Debug.LogFormat("Total Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
 
+    }
+
+    public void Generate(NoiseSettings[] noiseLayers)
+    {
+        Debug.Log("Runtime Generate Called");
+        float start = Time.realtimeSinceStartup;
+        NativeArray<HeightMapElement> result = new(mapSettings.mapDimentions.x * mapSettings.mapDimentions.y, Allocator.TempJob);
+        
+        for (int i = 0; i < noiseLayers.Length; i++)
+        {
+            if (noiseLayers[i].erosionSettings.baseSeed < 1)
+            {
+                noiseLayers[i].erosionSettings.baseSeed = 1;
+            }
+        }
+
+        if (mapSettings.erosionMode == ErosionMode.PerHeightMap)
+        {
+            TerrainGenerator.GenerateCommonPerMapErosion(noiseLayers, mapSettings, result);
+        }
+        else
+        {
+            TerrainGenerator.GenerateCommonErosion(noiseLayers, mapSettings, result);
+        }
+
+        Debug.LogFormat("Generation Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
+
+        GenerateHeightMapMesh(result);
+        Debug.LogFormat("Total Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
     }
 
     /// <summary>

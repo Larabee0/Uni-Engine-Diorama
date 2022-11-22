@@ -174,8 +174,7 @@ public struct ABVC
     public Color mainColour;
     public Color rimColour;
 
-    [SerializeField] private int mainTextureIndex;
-    public int MainTextureIndex => mainTextureIndex+1;
+    public int mainTextureIndex;
 
 
     [Range(0f, 1f)]

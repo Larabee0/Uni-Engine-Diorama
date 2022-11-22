@@ -6,9 +6,13 @@
             </ui:VisualElement>
             <ui:VisualElement name="LayerType" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 6px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
                 <ui:DropdownField label="Layer Type" index="0" choices="Simple,Rigid" name="LayerTypeDropDown" />
-                <ui:VisualElement name="VisualElement" style="flex-direction: row; justify-content: space-between;">
-                    <ui:Button text="Delete Layer" display-tooltip-when-elided="true" name="deleteLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 130px;" />
-                    <ui:Button text="Duplicate Layer" display-tooltip-when-elided="true" name="duplicateLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 130px;" />
+                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                    <ui:Button text="Delete Layer" display-tooltip-when-elided="true" name="deleteLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 110px;" />
+                    <ui:Button text="Duplicate Layer" display-tooltip-when-elided="true" name="duplicateLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 110px;" />
+                    <ui:VisualElement>
+                        <ui:Button text="Move Up" display-tooltip-when-elided="true" name="moveUpLayerButton" enable-rich-text="true" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 85px;" />
+                        <ui:Button text="Move Down" display-tooltip-when-elided="true" name="moveDownLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 85px;" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:Foldout text="Noise Settings" value="true" name="NoiseFoldout" style="width: 323px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-bottom: 8px; padding-left: 13px;">
@@ -78,7 +82,7 @@
                     <ui:Foldout text="Layer Pattern" value="true" name="PatternFoldout">
                         <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
                             <ui:Label text="Pattern Index" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 95px;" />
-                            <ui:SliderInt picking-mode="Ignore" value="0" high-value="2" low-value="0" show-input-field="true" name="patternIndexSlider" style="width: 124px;" />
+                            <ui:SliderInt picking-mode="Ignore" value="1" high-value="3" low-value="1" show-input-field="true" name="patternIndexSlider" style="width: 124px;" />
                         </ui:VisualElement>
                         <ui:VisualElement name="patternPreview" style="background-image: url(&apos;project://database/Assets/Cartoon_Texture_Pack/SAND/SAND_Beach/Textures/Sand_Beach_Base_AO.png?fileID=2800000&amp;guid=966c780cdfe66c2438105f8c119bfdd1&amp;type=3#Sand_Beach_Base_AO&apos;); width: 200px; height: 200px; -unity-background-scale-mode: scale-to-fit;" />
                     </ui:Foldout>

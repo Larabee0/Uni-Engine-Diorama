@@ -1,63 +1,118 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/ProjectStyleSheet.uss?fileID=7433441132597879392&amp;guid=79da2213dfa5be64b9ba9dec08556538&amp;type=3#ProjectStyleSheet" />
-    <ui:VisualElement>
-        <ui:VisualElement name="BasicSettings" style="align-items: stretch; flex-direction: column; width: 426px; background-color: rgb(56, 56, 56); border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
+    <ui:VisualElement style="align-items: flex-start;">
+        <ui:VisualElement name="BasicSettings" style="align-items: stretch; flex-direction: column; width: auto; background-color: rgb(56, 56, 56); border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
             <ui:VisualElement>
                 <ui:Label text="Main Terrain Settings" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold; font-size: 14px;" />
-            </ui:VisualElement>
-            <ui:VisualElement name="Dimentions" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
-                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
-                    <ui:Label text="Terrain Dimentions" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
-                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
-                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" name="mapWidthSlider" style="width: 200px;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
-                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
-                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" name="mapHeightSlider" style="width: 200px;" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="TextureScale" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
-                <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
-                    <ui:Label text="Texture Scale" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
-                    <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
-                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" name="texScaleX" style="width: 200px;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
-                    <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
-                    <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" name="texScaleY" style="width: 200px;" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="FloorLevel" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: none;">
-                <ui:VisualElement style="border-bottom-width: 1px; border-bottom-color: rgb(128, 128, 128); margin-bottom: 3px;">
-                    <ui:Label text="Floor Fraction" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
-                </ui:VisualElement>
-                <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
-                    <ui:Label text="Floor" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
-                    <ui:Slider picking-mode="Ignore" value="0.348" high-value="1" show-input-field="true" name="floorFracSlider" style="width: 200px;" />
-                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="UpdateSettings" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
                 <ui:VisualElement style="border-bottom-width: 1px; border-bottom-color: rgb(128, 128, 128); margin-bottom: 3px;">
                     <ui:Label text="Update Settings" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
-                    <ui:Label text="On Setting Change" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: auto;" />
+                    <ui:Label text="Update On Setting Change" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: auto;" />
                     <ui:Toggle value="true" name="updateOnChange" style="margin-right: 32px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: column; justify-content: space-between; align-items: stretch;">
                     <ui:Button text="Force Update" display-tooltip-when-elided="true" name="forceUpdate" style="margin-left: 14px; margin-right: 14px; padding-top: 3px; padding-bottom: 3px;" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="LayerSettings" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+            <ui:ScrollView horizontal-scroller-visibility="Hidden" style="max-height: 300px;">
+                <ui:Foldout text="Global Terrain Settings" value="true" name="GlobalSettingsFoldout" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-bottom: 3px; padding-left: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                    <ui:VisualElement name="Dimentions" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                        <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                            <ui:Label text="Terrain Dimentions" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                            <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                            <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" name="mapWidthSlider" style="width: 330px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                            <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                            <ui:SliderInt picking-mode="Ignore" value="255" high-value="1000" low-value="100" show-input-field="true" name="mapHeightSlider" style="width: 330px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="TextureScale" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                        <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                            <ui:Label text="Pattern Scale" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px;">
+                            <ui:Label text="Width" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 50px;" />
+                            <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" name="texScaleX" style="width: 330px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
+                            <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                            <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" name="texScaleY" style="width: 330px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Foldout text="Erosion Settings" value="false" name="ErosionFoldout" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-bottom: 3px; padding-left: 13px; margin-left: 3px; margin-right: 3px; margin-top: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                        <ui:VisualElement name="ErosinoSettings" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                <ui:Label text="Enable Erosion" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: auto;" />
+                                <ui:Toggle value="false" name="erodeToggle" style="margin-right: 4px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Base Seed" display-tooltip-when-elided="true" style="margin-right: 85px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 75px; padding-right: 2px;" />
+                                <ui:TextField picking-mode="Ignore" value="1077471792" text="1077471792" max-length="10" name="baseSeed" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 95px; margin-left: 0;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Erosion Passes" display-tooltip-when-elided="true" style="margin-right: 85px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 75px; padding-right: 2px;" />
+                                <ui:TextField picking-mode="Ignore" value="50000" text="50000" max-length="10" name="erosionIterations" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 95px; margin-left: 0;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                <ui:Label text="Erosion Brush Radius" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 145px;" />
+                                <ui:SliderInt picking-mode="Ignore" value="3" high-value="8" low-value="2" show-input-field="true" name="brushRadius" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Water Droplet Inertia" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 142px;" />
+                                <ui:Slider picking-mode="Ignore" value="0.05" high-value="1" show-input-field="true" name="inertia" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Water Sediment Capacity Factor" display-tooltip-when-elided="true" style="margin-right: 6px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 219px; padding-right: 2px;" />
+                                <ui:TextField picking-mode="Ignore" value="4" text="44" max-length="2" name="sedimentCapacityFactor" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 30px; margin-left: 0;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Min Sediment Capacity" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 159px;" />
+                                <ui:Slider picking-mode="Ignore" value="0.01" high-value="2" show-input-field="true" name="minSedimentCapacity" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Erosion Speed" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 119px;" />
+                                <ui:Slider picking-mode="Ignore" value="0.3" high-value="1" show-input-field="true" low-value="0" name="erodeSpeed" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Sediment Deposit Speed" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 167px;" />
+                                <ui:Slider picking-mode="Ignore" value="0.3" high-value="1" show-input-field="true" low-value="0" name="depositSpeed" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Water Evaporation Speed" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
+                                <ui:Slider picking-mode="Ignore" value="0.01" high-value="1" show-input-field="true" low-value="0" name="evaporateSpeed" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Droplet Gravity Multiplier" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
+                                <ui:Slider picking-mode="Ignore" value="4" high-value="10" show-input-field="true" low-value="0" name="gravity" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                <ui:Label text="Max Droplet Lifetime" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 145px;" />
+                                <ui:SliderInt picking-mode="Ignore" value="30" high-value="60" low-value="8" show-input-field="true" name="maxLifetime" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Start Water" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
+                                <ui:Slider picking-mode="Ignore" value="1" high-value="3" show-input-field="true" low-value="0.25" name="startWater" style="width: 180px;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                                <ui:Label text="Start Water" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
+                                <ui:Slider picking-mode="Ignore" value="1" high-value="3" show-input-field="true" low-value="0.5" name="startSpeed" style="width: 180px;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:Foldout>
+                </ui:Foldout>
+            </ui:ScrollView>
+            <ui:VisualElement name="LayerSettings" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
                 <ui:VisualElement style="margin-bottom: 3px;">
-                    <ui:Label text="Layers" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold;" />
+                    <ui:Label text="Terrain Noise Layers" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold;" />
                     <ui:Button text="Add Layer" display-tooltip-when-elided="true" name="addLayerButton" style="margin-left: 14px; margin-right: 14px; padding-top: 3px; padding-bottom: 3px; padding-left: 12px; padding-right: 12px;" />
                 </ui:VisualElement>
-                <ui:ScrollView horizontal-scroller-visibility="Hidden" name="LayerScrollView" style="max-height: 428px;">
+                <ui:ScrollView horizontal-scroller-visibility="Hidden" name="LayerScrollView" style="max-height: 300px;">
                     <ui:Foldout text="Layer One" name="LayerFoldout" value="true" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;">
                         <ui:VisualElement name="LayerSettings" style="align-items: stretch; flex-direction: column; width: 333px; background-color: rgb(56, 56, 56); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
                             <ui:VisualElement>
@@ -65,9 +120,13 @@
                             </ui:VisualElement>
                             <ui:VisualElement name="LayerType" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 6px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
                                 <ui:DropdownField label="Layer Type" index="0" choices="Simple,Rigid" name="LayerTypeDropDown" />
-                                <ui:VisualElement name="VisualElement" style="flex-direction: row; justify-content: space-between;">
-                                    <ui:Button text="Delete Layer" display-tooltip-when-elided="true" name="deleteLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 130px;" />
-                                    <ui:Button text="Duplicate Layer" display-tooltip-when-elided="true" name="duplicateLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 130px;" />
+                                <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                    <ui:Button text="Delete Layer" display-tooltip-when-elided="true" name="deleteLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 110px;" />
+                                    <ui:Button text="Duplicate Layer" display-tooltip-when-elided="true" name="duplicateLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 110px;" />
+                                    <ui:VisualElement>
+                                        <ui:Button text="Move Up" display-tooltip-when-elided="true" name="moveUpLayerButton" enable-rich-text="true" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 85px;" />
+                                        <ui:Button text="Move Down" display-tooltip-when-elided="true" name="moveDownLayerButton" style="margin-left: 0; margin-right: 0; padding-top: 3px; padding-bottom: 3px; padding-left: 0; padding-right: 0; width: 85px;" />
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:Foldout text="Noise Settings" value="true" name="NoiseFoldout" style="width: 323px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-bottom: 8px; padding-left: 13px;">

@@ -64,7 +64,7 @@ public struct BigHeightMapClamper : IJobParallelFor
                 element.RimColour = math.lerp(element.RimColour, floorColour.ToFloat4(), colourWeight);
                 element.rimFac = math.lerp(element.rimFac, 0f, colourWeight);
                 element.secondaryTextureIndex = element.mainTextureIndex;
-                element.mainTextureIndex = layerIndex - 1 >= 0 ? commonSettings[layerIndex - 1].abvcSettings.MainTextureIndex : 0;
+                element.mainTextureIndex = layerIndex - 1 >= 0 ? commonSettings[layerIndex - 1].abvcSettings.mainTextureIndex : 0;
                 element.secondaryBlendMul = 1f - colourWeight;
             }
         }

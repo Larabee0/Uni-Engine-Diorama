@@ -56,7 +56,7 @@ public struct HeightMapPainterABVC : IJobParallelFor
         element.rimPower = colourWrapper.abvcSettings.rimPower;
         element.rimFac = colourWrapper.abvcSettings.rimFacraction;
         element.absMaxHeight = colourWrapper.abvcSettings.absolutelMaxHeight;
-        element.mainTextureIndex = colourWrapper.abvcSettings.MainTextureIndex;
+        element.mainTextureIndex = colourWrapper.abvcSettings.mainTextureIndex;
 
         HeightMap[index] = element;
     }
@@ -91,7 +91,7 @@ public struct BigHeightMapPainterABVC : IJobParallelFor
         element.rimPower = colourWrapper.abvcSettings.rimPower;
         element.rimFac = colourWrapper.abvcSettings.rimFacraction;
         element.absMaxHeight = colourWrapper.abvcSettings.absolutelMaxHeight;
-        element.mainTextureIndex = colourWrapper.abvcSettings.MainTextureIndex;
+        element.mainTextureIndex = colourWrapper.abvcSettings.mainTextureIndex;
 
         allMaps[index] = element;
     }
