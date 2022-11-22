@@ -41,19 +41,21 @@ Create a water shader to allow lake formations to be created
 
 # Acknowledgement
 ## Art
-- Terrain pattern Textures take from "FREE Stylized PBR Textures Pack" https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
-- Air Ship Textures take from "FREE Stylized PBR Textures Pack" https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
- and "Yughues Free Metal Materials" https://assetstore.unity.com/packages/2d/textures-materials/metals/yughues-free-metal-materials-12949
-- Both textures packs are free under the Unity Extension Asset licience granting use per user.
-- The airship model itself was made by me in blender.
+* Terrain pattern Textures take from "FREE Stylized PBR Textures Pack"
+  * https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
+* Air Ship Textures take from "FREE Stylized PBR Textures Pack" and "Yughues Free Metal Materials" 
+  * https://assetstore.unity.com/packages/2d/textures-materials/free-stylized-pbr-textures-pack-111778
+  * https://assetstore.unity.com/packages/2d/textures-materials/metals/yughues-free-metal-materials-12949
+* Both textures packs are free under the Unity Extension Asset licience granting free use per user.
 ## Tech
-- Original Noise Generation alogrithims were written by Sebastian Lague and released under the MIT License https://github.com/SebLague/Procedural-Planets
-- Original Hydraulic Erosion alogrithim was written by Sebastian Lague and released under the MIT License https://github.com/SebLague/Hydraulic-Erosion
-- These algorithims are clearly stated and sourced in the code files they are relevant to in the latest commit.
-- Conversion into the C# Jobs system for both of these projects was undertaken souly by myself as is the mesh generation Job.
-- Terrain Shaders (Shader Graph) are based off the HLSL shaders in the Hydraulic Erosion repo by Sebastian Lague.
-- These have been converted to shader graph by myself and then signficiantly modified to support multiple colours, colour blending, textures & texture blendingk, based off information provided in the mesh vertex colour channels and UV channels and through a supplimentary data texture.
+* Original Noise Generation alogrithims were written by Sebastian Lague
+  * Released under the MIT License https://github.com/SebLague/Procedural-Planets
+* Original Hydraulic Erosion alogrithim was written by Sebastian Lague
+  * Released under the MIT License https://github.com/SebLague/Hydraulic-Erosion
+* These algorithims are clearly stated and sourced in the code files they are relevant to in the latest commits.
+
+* Terrain Shaders (Shader Graph) are based off the HLSL shaders in the Hydraulic Erosion repo by Sebastian Lague (MIT).
 
 # Project License
-Other repos used in the creation of this Repo are licensed under the MIT license, under this license pretty much anymore can take work I created here and modify it anyway, redistrubute it how the like, make a closed source version or roll it into a GNU GPL v3 project.
-This is how I wish for my work to be used by third parties if they wish to, I don't mind if they make an improvment and don't publish it for this project in particular, as its a small "my first unity" project to demonstrate I can use the engine. So therefore Under the MIT license they can use it if they want but have no obligations to republish it.
+Other repos used in the creation of this Repo are licensed under the MIT license, under this license pretty much anymore can take work I created here and modify it in anyway, redistrubute it how the like, make a closed source version or roll it into a GNU GPL v3 project.
+This is how I wish for my work to be used by third parties if they wish to, I don't mind if they make an improvment and don't publish it for this project in particular, as its a small "my first unity" project to demonstrate I can use the engine. So therefore I have choosen the MIT license and they can use it if they want but have no obligations to republish any improvements like in a GNU GPL v3 licence.
