@@ -56,7 +56,7 @@ public struct BigHeightMapMinMaxCal : IJobParallelFor
         RelativeNoiseData data = this.minMax[index];
         data.minMax = minMax;
         data.mid = (minMax.x + minMax.y) / 2f;
-        data.flatFloor = mapSettings.floorPercentage;
+        data.flatFloor = commonSettings[index].floorPercentage;
         data.minValue = commonSettings[index].minValue;
         this.minMax[index] = data;
     }

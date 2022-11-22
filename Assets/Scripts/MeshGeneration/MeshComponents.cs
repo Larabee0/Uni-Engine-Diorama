@@ -23,8 +23,6 @@ public struct MeshAreaSettings : IComponentData
     public ShaderPicker shader;
     public ErosionMode erosionMode;
     public int2 textureTiling;
-    [Range(0f, 1f)]
-    public float floorPercentage;
     public Color32 floorColour;
     public Color32 lower;
     public Color32 higher;

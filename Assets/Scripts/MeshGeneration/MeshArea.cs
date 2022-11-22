@@ -22,11 +22,13 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     [SerializeField] private int textureHash;
     [SerializeField] private Texture2D floorTexture;
     [SerializeField] private Texture2D[] terrainTextures;
+    public Texture2D[] TerrainTextures => terrainTextures;
     [SerializeField] private Texture2DArray bundledTextures;
     [SerializeField] private MeshAreaSettings mapSettings;
 
     [Tooltip("First element in the simple layers list is overwritten by this property.\nThis is a work around for an editor bug when trying to edit the first element of a collection.")]
     [SerializeField] private NoiseSettings firstNoiseLayer;
+    public NoiseSettings FirstNoiseLayer => firstNoiseLayer;
     [SerializeField] private NoiseSettings[] noiseLayers;
 
     [SerializeField] private bool UpdateOnChange;
@@ -38,20 +40,33 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     {
         meshFilter=GetComponent<MeshFilter>();
         meshFilter.mesh = activeMesh = new Mesh() { subMeshCount = 1, name = "MeshArea" };
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.material = abvcTexturedMat;
     }
-    private void Start()
-    {
-        Generate();
-    }
+    // private void Start()
+    // {
+    //     Generate();
+    // }
 
     private void OnValidate()
     {
 
-        if (UpdateOnChange)
+        if (!Application.isPlaying &&UpdateOnChange)
         {
             Generate();
         }
     }
+
+    public void UpdateDimentions(int2 dimentions)
+    {
+        mapSettings.mapDimentions = dimentions;
+    }
+
+    public void UpdateTextureTiling(int2 dimentions)
+    {
+        mapSettings.textureTiling = dimentions;
+    }
+
 
     public void Generate()
     {
@@ -110,7 +125,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             meshRenderer.sharedMaterial = bvcMat;
             var generator = new MeshGeneratorBVC
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,
@@ -125,7 +140,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             meshRenderer.sharedMaterial = abvcMat;
             var generator = new MeshGeneratorABVC
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,
@@ -140,7 +155,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             NativeArray<float4> rawDataForTexture = new(heightMap.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             var generator = new MeshGeneratorABVCT
             {
-                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(mapSettings.floorPercentage, heightMap),
+                relativeHeightMapData = TerrainGenerator.CalculateRelativeNoiseData(heightMap),
                 meshSettings = mapSettings,
                 meshIndex = 0,
                 meshDataArray = meshDataArray,
@@ -175,8 +190,14 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
             }
             abvcTexturedMat.SetTexture("_Patterns", bundledTextures);
             Debug.LogFormat("Texture Array Time: {0}ms", (Time.realtimeSinceStartup - start) * 1000f);
-
-            meshRenderer.sharedMaterial = abvcTexturedMat;
+            if (Application.isPlaying)
+            {
+                meshRenderer.material = abvcTexturedMat;
+            }
+            else
+            {
+                meshRenderer.sharedMaterial = abvcTexturedMat;
+            }
         }
 
         heightMap.Dispose();

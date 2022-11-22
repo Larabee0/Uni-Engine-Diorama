@@ -533,7 +533,7 @@ public static class TerrainGenerator
     /// <param name="mapSettings">Main map settings </param>
     /// <param name="heightMap"> height map to process</param>
     /// <returns> relative noise data </returns>
-    public static RelativeNoiseData CalculateRelativeNoiseData(float floor,NativeArray<HeightMapElement> heightMap)
+    public static RelativeNoiseData CalculateRelativeNoiseData(NativeArray<HeightMapElement> heightMap)
     {
         // get the lowest and highest point on the map
         // we can use a 0-1 value to set the floor of the map using this.
@@ -546,7 +546,6 @@ public static class TerrainGenerator
 
         heightMapMinMaxer.Schedule().Complete();
         RelativeNoiseData data = relativeData.Value;
-        data.flatFloor = floor;
         relativeData.Dispose();
         return data;
     }
