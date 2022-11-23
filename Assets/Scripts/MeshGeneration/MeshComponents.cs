@@ -24,8 +24,6 @@ public struct MeshAreaSettings : IComponentData
     public ErosionMode erosionMode;
     public int2 textureTiling;
     public Color32 floorColour;
-    public Color32 lower;
-    public Color32 higher;
 }
 
 [Serializable]

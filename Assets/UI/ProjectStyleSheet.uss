@@ -99,45 +99,45 @@
     border-bottom-left-radius: 3px;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
-    border-left-color: rgba(48, 48, 48, 255);
-    border-right-color: rgba(48, 48, 48, 255);
-    border-top-color: rgba(48, 48, 48, 255);
-    border-bottom-color: rgba(36, 36, 36, 255);
-    background-color: rgba(88, 88, 88, 255);
+    border-left-color: rgb(48, 48, 48);
+    border-right-color: rgb(48, 48, 48);
+    border-top-color: rgb(48, 48, 48);
+    border-bottom-color: rgb(36, 36, 36);
+    background-color: rgb(88, 88, 88);
 }
 
 .unity-button:hover {
-    background-color: rgba(103, 103, 103, 255);
-    border-left-color: rgba(48, 48, 48, 255);
-    border-right-color: rgba(48, 48, 48, 255);
-    border-top-color: rgba(48, 48, 48, 255);
-    border-bottom-color: rgba(36, 36, 36, 255);
+    background-color: rgb(103, 103, 103);
+    border-left-color: rgb(48, 48, 48);
+    border-right-color: rgb(48, 48, 48);
+    border-top-color: rgb(48, 48, 48);
+    border-bottom-color: rgb(36, 36, 36);
 }
 
 .unity-button:active {
-    background-color: rgba(70, 96, 124, 255);
-    border-left-color: rgba(36, 36, 36, 255);
-    border-right-color: rgba(36, 36, 36, 255);
-    border-top-color: rgba(13, 13, 13, 255);
-    border-bottom-color: rgba(36, 36, 36, 255);
+    background-color: rgb(70, 96, 124);
+    border-left-color: rgb(36, 36, 36);
+    border-right-color: rgb(36, 36, 36);
+    border-top-color: rgb(13, 13, 13);
+    border-bottom-color: rgb(36, 36, 36);
 }
 
 .unity-toggle:hover {
-    border-left-color: rgba(101, 101, 101, 255);
-    border-right-color: rgba(101, 101, 101, 255);
-    border-top-color: rgba(101, 101, 101, 255);
-    border-bottom-color: rgba(101, 101, 101, 255);
+    border-left-color: rgb(101, 101, 101);
+    border-right-color: rgb(101, 101, 101);
+    border-top-color: rgb(101, 101, 101);
+    border-bottom-color: rgb(101, 101, 101);
 }
 
 .unity-toggle:focus {
-    border-left-color: rgba(58, 121, 187, 255);
-    border-right-color: rgba(58, 121, 187, 255);
-    border-top-color: rgba(58, 121, 187, 255);
-    border-bottom-color: rgba(58, 121, 187, 255);
+    border-left-color: rgb(58, 121, 187);
+    border-right-color: rgb(58, 121, 187);
+    border-top-color: rgb(58, 121, 187);
+    border-bottom-color: rgb(58, 121, 187);
 }
 
 .unity-base-slider__dragger:hover {
-    background-color: rgba(234, 234, 234, 255);
+    background-color: rgb(234, 234, 234);
 }
 
 .unity-base-popup-field__label {
@@ -151,4 +151,22 @@
     padding-right: 13px;
     padding-top: 1px;
     padding-bottom: 1px;
+}
+
+.ColourDisplay {
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.ColourDisplay:hover {
+    border-left-color: rgba(255, 255, 255, 255);
+    border-right-color: rgba(255, 255, 255, 255);
+    border-top-color: rgba(255, 255, 255, 255);
+    border-bottom-color: rgba(255, 255, 255, 255);
 }

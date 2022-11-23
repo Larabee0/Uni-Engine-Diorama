@@ -15,6 +15,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: column; justify-content: space-between; align-items: stretch;">
                     <ui:Button text="Force Update" display-tooltip-when-elided="true" name="forceUpdate" style="margin-left: 14px; margin-right: 14px; padding-top: 3px; padding-bottom: 3px;" />
+                    <ui:Button text="Exit Fascinator" display-tooltip-when-elided="true" name="exitButton" style="margin-left: 14px; margin-right: 14px; padding-top: 3px; padding-bottom: 3px;" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView horizontal-scroller-visibility="Hidden" style="max-height: 300px;">
@@ -43,6 +44,18 @@
                         <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
                             <ui:Label text="Height" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
                             <ui:SliderInt picking-mode="Ignore" value="36" high-value="250" low-value="1" show-input-field="true" name="texScaleY" style="width: 330px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WaterColour" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                            <ui:Label text="Water Colour" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 90px;" />
+                            <ui:VisualElement name="WaterColourDisplay" class="ColourDisplay" style="height: 16px; width: 212px;">
+                                <ui:VisualElement name="MapSettingsGridColour" style="flex-direction: row; align-items: center; background-color: rgb(128, 128, 128); height: 13px; width: 100%;" />
+                                <ui:VisualElement name="Alphas" style="flex-direction: row; height: 3px; width: 100%;">
+                                    <ui:VisualElement name="MapSettingsWhiteAlpha" style="background-color: rgb(255, 255, 255); width: 50%; height: 3px;" />
+                                    <ui:VisualElement name="MapSettingsBlackAlpha" style="height: 3px; background-color: rgb(0, 0, 0); width: 50%;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:Foldout text="Erosion Settings" value="false" name="ErosionFoldout" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-bottom: 3px; padding-left: 13px; margin-left: 3px; margin-right: 3px; margin-top: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
@@ -100,11 +113,24 @@
                                 <ui:Slider picking-mode="Ignore" value="1" high-value="3" show-input-field="true" low-value="0.25" name="startWater" style="width: 180px;" />
                             </ui:VisualElement>
                             <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
-                                <ui:Label text="Start Water" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
+                                <ui:Label text="Start Speed" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 164px;" />
                                 <ui:Slider picking-mode="Ignore" value="1" high-value="3" show-input-field="true" low-value="0.5" name="startSpeed" style="width: 180px;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:Foldout>
+                    <ui:VisualElement name="CameraSettings" style="border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                        <ui:VisualElement style="border-bottom-color: rgb(128, 128, 128); border-bottom-width: 1px; margin-bottom: 3px;">
+                            <ui:Label text="Airship and Camera Settings" display-tooltip-when-elided="true" style="-unity-text-align: upper-center;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: space-between;">
+                            <ui:Label text="Airship Seeped" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 107px;" />
+                            <ui:Slider picking-mode="Ignore" value="0.5" high-value="1" show-input-field="true" name="airshipSpeedSlider" style="width: 130px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: center;">
+                            <ui:Label text="Free Look Camera" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 50px;" />
+                            <ui:Toggle value="false" name="enableFreelookCamera" style="margin-right: 32px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:Foldout>
             </ui:ScrollView>
             <ui:VisualElement name="LayerSettings" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-left-color: rgb(128, 128, 128); border-right-color: rgb(128, 128, 128); border-top-color: rgb(128, 128, 128); border-bottom-color: rgb(128, 128, 128); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">

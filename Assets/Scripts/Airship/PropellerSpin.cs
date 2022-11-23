@@ -10,7 +10,7 @@ public class PropellerSpin : MonoBehaviour
     [SerializeField] private float maxSpinSpeed = 10;
 
     [Range(0, 1)]
-    [SerializeField] private float throttle = 0;
+    public float throttle = 0;
 
     [SerializeField] private bool autoThrottle = false;
     [SerializeField] private float autoThrottleSpeed = 5;

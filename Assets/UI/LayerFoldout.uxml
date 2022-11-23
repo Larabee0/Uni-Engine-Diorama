@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/ProjectStyleSheet.uss?fileID=7433441132597879392&amp;guid=79da2213dfa5be64b9ba9dec08556538&amp;type=3#ProjectStyleSheet" />
     <ui:Foldout text="Layer One" name="LayerFoldout" value="true" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;">
         <ui:VisualElement name="LayerSettings" style="align-items: stretch; flex-direction: column; width: 333px; background-color: rgb(56, 56, 56); padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
             <ui:VisualElement>
@@ -69,15 +70,33 @@
                 <ui:VisualElement name="ShaderSettings" style="margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
                     <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: flex-start;">
                         <ui:Label text="Main Colour" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 119px;" />
-                        <ui:Slider picking-mode="Ignore" value="0.5" high-value="1" show-input-field="true" style="width: 130px;" />
+                        <ui:VisualElement name="MainColourDisplay" class="ColourDisplay" style="height: 16px; width: 212px;">
+                            <ui:VisualElement name="MapSettingsGridColour" style="flex-direction: row; align-items: center; background-color: rgb(128, 128, 128); height: 13px; width: 100%;" />
+                            <ui:VisualElement name="Alphas" style="flex-direction: row; height: 3px; width: 100%;">
+                                <ui:VisualElement name="MapSettingsWhiteAlpha" style="background-color: rgb(255, 255, 255); width: 50%; height: 3px;" />
+                                <ui:VisualElement name="MapSettingsBlackAlpha" style="height: 3px; background-color: rgb(0, 0, 0); width: 50%;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">
                         <ui:Label text="Flat Colour" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-bottom: 1px; margin-top: 1px; margin-right: 3px; margin-left: 3px; height: 18px; width: 119px;" />
-                        <ui:SliderInt picking-mode="Ignore" value="36" high-value="500" low-value="2" show-input-field="true" style="width: 130px;" />
+                        <ui:VisualElement name="FlatColourDisplay" class="ColourDisplay" style="height: 16px; width: 212px;">
+                            <ui:VisualElement name="MapSettingsGridColour" style="flex-direction: row; align-items: center; background-color: rgb(128, 128, 128); height: 13px; width: 100%;" />
+                            <ui:VisualElement name="Alphas" style="flex-direction: row; height: 3px; width: 100%;">
+                                <ui:VisualElement name="MapSettingsWhiteAlpha" style="background-color: rgb(255, 255, 255); width: 50%; height: 3px;" />
+                                <ui:VisualElement name="MapSettingsBlackAlpha" style="height: 3px; background-color: rgb(0, 0, 0); width: 50%;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 3px; justify-content: flex-start;">
                         <ui:Label text="Rim Colour" display-tooltip-when-elided="true" style="margin-right: 3px; margin-left: 3px; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-left; height: 18px; width: 119px;" />
-                        <ui:Slider picking-mode="Ignore" value="0.5" high-value="10" show-input-field="true" low-value="0.01" style="width: 130px;" />
+                        <ui:VisualElement name="RimColourDisplay" class="ColourDisplay" style="height: 16px; width: 212px;">
+                            <ui:VisualElement name="MapSettingsGridColour" style="flex-direction: row; align-items: center; background-color: rgb(128, 128, 128); height: 13px; width: 100%;" />
+                            <ui:VisualElement name="Alphas" style="flex-direction: row; height: 3px; width: 100%;">
+                                <ui:VisualElement name="MapSettingsWhiteAlpha" style="background-color: rgb(255, 255, 255); width: 50%; height: 3px;" />
+                                <ui:VisualElement name="MapSettingsBlackAlpha" style="height: 3px; background-color: rgb(0, 0, 0); width: 50%;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:Foldout text="Layer Pattern" value="true" name="PatternFoldout">
                         <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: center;">

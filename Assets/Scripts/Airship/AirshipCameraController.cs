@@ -15,7 +15,12 @@ public class AirshipCameraController : MonoBehaviour
     [SerializeField] private float neutralZ;
     [SerializeField] private float extremeZ;
 
+    [SerializeField] private PropellerSpin[] props;
+    [SerializeField] private CinemachineDollyCart kart;
+    [SerializeField] private float maxAirshipSpeed;
+    private float airshipdThrottlePos;
     [SerializeField] private float timeFromZeroY;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,4 +62,14 @@ public class AirshipCameraController : MonoBehaviour
         orbitalTransposer.m_FollowOffset=followOffset;
     }
 
+    public void SetSpeed(float speed)
+    {
+        airshipdThrottlePos = speed;
+
+        kart.m_Speed = Mathf.Lerp(0,maxAirshipSpeed, airshipdThrottlePos);
+        for (int i = 0; i < props.Length; i++)
+        {
+            props[i].throttle = airshipdThrottlePos;
+        }
+    }
 }

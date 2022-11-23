@@ -25,6 +25,7 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     public Texture2D[] TerrainTextures => terrainTextures;
     [SerializeField] private Texture2DArray bundledTextures;
     [SerializeField] private MeshAreaSettings mapSettings;
+    public MeshAreaSettings MapSettings => mapSettings;
 
     [Tooltip("First element in the simple layers list is overwritten by this property.\nThis is a work around for an editor bug when trying to edit the first element of a collection.")]
     [SerializeField] private NoiseSettings firstNoiseLayer;
@@ -67,6 +68,11 @@ public class MeshArea : MonoBehaviour, IConvertGameObjectToEntity
     public void UpdateTextureTiling(int2 dimentions)
     {
         mapSettings.textureTiling = dimentions;
+    }
+
+    public void UpdateFloorColour(Color colour)
+    {
+        mapSettings.floorColour = colour;
     }
 
 

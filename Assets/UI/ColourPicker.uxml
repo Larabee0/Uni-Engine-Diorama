@@ -1,0 +1,45 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/ColourPickerUSS.uss?fileID=7433441132597879392&amp;guid=a45a77348d85d824cb8e6c01bb3b9283&amp;type=3#ColourPickerUSS" />
+    <ui:VisualElement name="ColourPicker" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center;">
+        <ui:VisualElement style="background-color: rgb(56, 56, 56); -unity-text-outline-color: rgba(255, 255, 255, 0); color: rgb(255, 255, 255); padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px; align-items: stretch; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px;">
+            <ui:VisualElement name="TopButtonRow" style="flex-direction: row-reverse; display: none;">
+                <ui:Button display-tooltip-when-elided="true" enable-rich-text="true" name="SmallCloseButton" class="CloseButton" style="border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); width: 15px; height: 15px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px; display: none;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="PreviewRow" style="align-items: flex-end; margin-bottom: 4px; margin-top: 4px;">
+                <ui:VisualElement name="TransparentBackground" style="background-image: url(&apos;project://database/Assets/UI/Images/TransparentBackground.png?fileID=2800000&amp;guid=61f6267083adcb04cb465ddae98a84d1&amp;type=3#TransparentBackground&apos;); width: 76px; height: 24px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; justify-content: space-around; flex-direction: row;">
+                    <ui:VisualElement name="OldColourPreview" style="height: 24px; width: 38px; background-color: rgb(255, 255, 255); border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+                    <ui:VisualElement name="NewColourPreview" style="height: 24px; width: 38px; border-bottom-right-radius: 3px; border-top-right-radius: 3px; background-color: rgb(255, 0, 0);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="ColourGradient" style="background-image: url(&apos;project://database/Assets/UI/ColourGradient.png?fileID=2800000&amp;guid=98acccb268c36834683b6fe8e2f7aac8&amp;type=3#ColourGradient&apos;); width: 256px; height: 256px; margin-bottom: 0;">
+                <ui:VisualElement name="PickerPoint" picking-mode="Ignore" style="position: relative; width: 12px; height: 12px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; left: 230px; top: 250px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="Sliders" style="flex-direction: row; justify-content: center; margin-top: 4px;">
+                <ui:VisualElement>
+                    <ui:Label text="H:" display-tooltip-when-elided="true" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-left: 0; margin-right: 0; margin-top: 2px; margin-bottom: 2px; height: 18px;" />
+                    <ui:Label text="S:" display-tooltip-when-elided="true" style="margin-left: 0; margin-right: 0; margin-top: 2px; margin-bottom: 2px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; height: 18px;" />
+                    <ui:Label text="V:" display-tooltip-when-elided="true" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-left: 0; margin-right: 0; margin-top: 2px; margin-bottom: 2px; height: 18px;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="Sliders" style="align-items: flex-start;">
+                    <ui:SliderInt picking-mode="Ignore" value="255" high-value="360" name="HueSlider" style="background-image: url(&apos;project://database/Assets/UI/HueStrip.png?fileID=2800000&amp;guid=e857607c8f0e5b74ca6011fec42b4a5a&amp;type=3#HueStrip&apos;); min-height: 18px; height: 18px; align-items: stretch; width: 147px; margin-right: 0; margin-left: 0;" />
+                    <ui:SliderInt picking-mode="Ignore" value="50" high-value="100" name="SaturationSlider" style="min-height: 18px; height: 18px; align-items: stretch; width: 147px; margin-right: 0; margin-left: 0;" />
+                    <ui:SliderInt picking-mode="Ignore" value="100" high-value="100" name="ValueSlider" style="min-height: 18px; height: 18px; align-items: stretch; width: 147px; margin-right: 0; margin-left: 0;" />
+                    <ui:SliderInt picking-mode="Ignore" value="0" high-value="255" name="AlphaSlider" style="background-image: url(&apos;project://database/Assets/UI/TransparentToOpaque.png?fileID=2800000&amp;guid=c02728c21aa6dd54cbddde3486a26783&amp;type=3#TransparentToOpaque&apos;); min-height: 18px; width: 147px; margin-right: 0; margin-left: 0;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="TextBoxes">
+                    <ui:TextField picking-mode="Ignore" value="255" text="255" name="RedValue" max-length="3" style="height: 18px; width: 35px;" />
+                    <ui:TextField picking-mode="Ignore" value="0" text="0" name="GreenValue" max-length="3" style="height: 18px; width: 35px;" />
+                    <ui:TextField picking-mode="Ignore" value="0" text="0" name="BlueValue" max-length="3" style="height: 18px; width: 35px;" />
+                    <ui:TextField picking-mode="Ignore" value="0" text="0" name="AlphaValue" max-length="3" style="height: 18px; width: 35px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="HexRow">
+                <ui:TextField picking-mode="Ignore" label="Hexadecimal" value="8080FFFF" text="8080FFFF" max-length="8" name="HexField" style="width: 235px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="BottomButtonRow" style="flex-direction: row; justify-content: center; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0;">
+                <ui:Button text="Close" display-tooltip-when-elided="true" name="CloseButton" class="pawn-selection-top-buttons StandardButton" style="width: 120px; height: 24px;" />
+                <ui:Button text="Apply" display-tooltip-when-elided="true" name="ApplyButton" class="pawn-selection-top-buttons StandardButton" style="width: 120px; height: 24px; margin-left: 5px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

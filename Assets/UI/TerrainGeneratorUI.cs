@@ -16,8 +16,8 @@ public class TerrainGeneratorUI : MonoBehaviour
     private Foldout globalSettingsFoldout;
     private BasicSettings basicSettings;
     private ErosionSettings erosionSettings;
-
-
+    [SerializeField] private AirshipCameraController airshipController;
+    [SerializeField] private GameObject freeLookCamera;
     [SerializeField] private MeshArea terrainInferface;
 
     private Button addLayerButton;
@@ -39,21 +39,23 @@ public class TerrainGeneratorUI : MonoBehaviour
         globalSettingsFoldout = RootVisualElement.Q<Foldout>("GlobalSettingsFoldout");
         basicSettings = new(RootVisualElement.Q("BasicSettings"));
         bool cacheUpdateOnChange = basicSettings.UpdateOnChange;
-        basicSettings.updateOnSettingChange.value = basicSettings.UpdateOnChange ? false : true;
+        basicSettings.updateOnSettingChange.value = false;
         basicSettings.mapWidth.RegisterValueChangedCallback(ev => UpdateDimentions());
         basicSettings.mapHeight.RegisterValueChangedCallback(ev => UpdateDimentions());
         basicSettings.texScaleX.RegisterValueChangedCallback(ev => UpdateTexScale());
         basicSettings.texScaleY.RegisterValueChangedCallback(ev => UpdateTexScale());
         basicSettings.updateOnSettingChange.RegisterValueChangedCallback(ev => UpdateOnChange());
         basicSettings.forceUpdate.RegisterCallback<ClickEvent>(ev => GatherDataAndGenerate());
-
+        basicSettings.airshipSpeedSlider.RegisterValueChangedCallback(ev=> airshipController.SetSpeed(ev.newValue));
+        basicSettings.enableFreeLookCamera.RegisterValueChangedCallback(ev=>freeLookCamera.SetActive(ev.newValue));
+        freeLookCamera.SetActive(basicSettings.enableFreeLookCamera.value);
         erosionSettings = new(this, RootVisualElement.Q<Foldout>("ErosionFoldout"));
-
         addLayerButton = RootVisualElement.Q<Button>("addLayerButton");
         layersScrollView = RootVisualElement.Q<ScrollView>("LayerScrollView");
 
-        layersScrollView.Clear();
+        SetGlobalTerrainSettings();
 
+        layersScrollView.Clear();
         AddLayer();
 
         NoiseSettings[] baseSettings = terrainInferface.NoiseLayers;
@@ -100,8 +102,17 @@ public class TerrainGeneratorUI : MonoBehaviour
         }
 
         noiseSettings[0].erosionSettings = erosionSettings.GetSettings();
-
+        terrainInferface.UpdateFloorColour(basicSettings.waterColour.Colour);
         terrainInferface.Generate(noiseSettings);
+    }
+
+    private void SetGlobalTerrainSettings()
+    {
+        basicSettings.mapWidth.value = terrainInferface.MapSettings.mapDimentions.x;
+        basicSettings.mapHeight.value = terrainInferface.MapSettings.mapDimentions.y;
+        basicSettings.texScaleX.value = terrainInferface.MapSettings.textureTiling.x;
+        basicSettings.texScaleY.value = terrainInferface.MapSettings.textureTiling.y;
+        basicSettings.waterColour.Colour = terrainInferface.MapSettings.floorColour;
     }
 
     private void AddLayer()
@@ -161,11 +172,15 @@ public class TerrainGeneratorUI : MonoBehaviour
         public SliderInt texScaleX;
         public SliderInt texScaleY;
 
-        public Slider floorFraction;
+        public ColourDisplay waterColour;
+
+        public Slider airshipSpeedSlider;
+        public Toggle enableFreeLookCamera;
 
         public Toggle updateOnSettingChange;
         public bool UpdateOnChange => updateOnSettingChange.value;
         public Button forceUpdate;
+        public Button exitButton;
 
         public BasicSettings(VisualElement root)
         {
@@ -174,10 +189,14 @@ public class TerrainGeneratorUI : MonoBehaviour
             mapHeight = root.Q<SliderInt>("mapHeightSlider");
             texScaleX = root.Q<SliderInt>("texScaleX");
             texScaleY = root.Q<SliderInt>("texScaleY");
-            floorFraction = root.Q<Slider>("floorFracSlider");
-
+            airshipSpeedSlider = root.Q<Slider>("airshipSpeedSlider");
+            waterColour = new ColourDisplay(root.Q("WaterColourDisplay"));
             updateOnSettingChange = root.Q<Toggle>("updateOnChange");
+            enableFreeLookCamera = root.Q<Toggle>("enableFreelookCamera");
+            exitButton = root.Q<Button>("exitButton");
             forceUpdate = root.Q<Button>("forceUpdate");
+
+            exitButton.RegisterCallback<ClickEvent>(ev=>Application.Quit());
         }
     }
 
@@ -423,9 +442,9 @@ public class TerrainGeneratorUI : MonoBehaviour
         private readonly Foldout shaderFoldout;
         public bool ShaderFoldoutExpanded { get => shaderFoldout.value; set => shaderFoldout.value = value; }
 
-        private readonly VisualElement mainColour;
-        private readonly VisualElement flatColour;
-        private readonly VisualElement rimColour;
+        private readonly ColourDisplay mainColour;
+        private readonly ColourDisplay flatColour;
+        private readonly ColourDisplay rimColour;
 
         private readonly Foldout patternFoldout;
         public bool PatternFoldoutExpanded { get => patternFoldout.value; set => patternFoldout.value = value; }
@@ -488,9 +507,9 @@ public class TerrainGeneratorUI : MonoBehaviour
 
             shaderFoldout = container.Q<Foldout>("ShaderFoldout");
 
-            // mainColour = layerFoldout.Q("");
-            // flatColour = layerFoldout.Q("");
-            // rimColour = layerFoldout.Q("");
+            mainColour =new ColourDisplay(container.Q("MainColourDisplay"));
+            flatColour =new ColourDisplay(container.Q("FlatColourDisplay"));
+            rimColour = new ColourDisplay(container.Q("RimColourDisplay"));
 
             patternFoldout = container.Q<Foldout>("PatternFoldout");
             patternIndex = container.Q<SliderInt>("patternIndexSlider");
@@ -570,6 +589,10 @@ public class TerrainGeneratorUI : MonoBehaviour
             globalHeightOffset.value = settings.basicSettings.offsetValue.ToString();
             rigidNoiseWeightMultiplier.value = settings.weightMultiplier.ToString();
 
+            mainColour.Colour = settings.basicSettings.abvcSettings.mainColour;
+            flatColour.Colour = settings.basicSettings.abvcSettings.flatColour;
+            rimColour.Colour = settings.basicSettings.abvcSettings.rimColour;
+
             PatternIndex = settings.basicSettings.abvcSettings.mainTextureIndex;
             SlopeThreshold = settings.basicSettings.abvcSettings.slopeThreshold;
             BlendAmmount = settings.basicSettings.abvcSettings.blendAmount;
@@ -599,6 +622,11 @@ public class TerrainGeneratorUI : MonoBehaviour
             template.basicSettings.baseRoughness= BaseRoughness;
             template.basicSettings.roughness = ExtraRoughness;
             template.basicSettings.persistence= Persistence;
+
+
+            template.basicSettings.abvcSettings.mainColour = mainColour.Colour;
+            template.basicSettings.abvcSettings.flatColour = flatColour.Colour;
+            template.basicSettings.abvcSettings.rimColour = rimColour.Colour;
 
             template.basicSettings.abvcSettings.mainTextureIndex = PatternIndex;
             template.basicSettings.abvcSettings.slopeThreshold= SlopeThreshold;
