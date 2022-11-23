@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/ProjectStyleSheet.uss?fileID=7433441132597879392&amp;guid=79da2213dfa5be64b9ba9dec08556538&amp;type=3#ProjectStyleSheet" />
-    <ui:VisualElement style="align-items: flex-start;">
+    <ui:VisualElement picking-mode="Ignore" style="align-items: flex-start;">
         <ui:VisualElement name="BasicSettings" style="align-items: stretch; flex-direction: column; width: auto; background-color: rgb(56, 56, 56); border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; display: flex;">
             <ui:VisualElement>
                 <ui:Label text="Main Terrain Settings" display-tooltip-when-elided="true" style="-unity-text-align: upper-center; -unity-font-style: bold; font-size: 14px;" />

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using Unity.Mathematics;
+using UnityEngine.EventSystems;
 
 public class AirshipCameraController : MonoBehaviour
 {
+    private EventSystem eventSystem;
     private CinemachineVirtualCamera virtualCamera;
     private CinemachineOrbitalTransposer orbitalTransposer;
     [SerializeField] private float verticalSpeed = 10;
@@ -17,8 +19,9 @@ public class AirshipCameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        eventSystem = FindObjectOfType<EventSystem>();
         virtualCamera = GetComponent<CinemachineVirtualCamera>();
-
+        
         orbitalTransposer = virtualCamera.GetCinemachineComponent<CinemachineOrbitalTransposer>();
         // neutralZ = orbitalTransposer.m_FollowOffset.z;
         // extremeZ =neutralZ / 2f;
@@ -28,6 +31,11 @@ public class AirshipCameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (eventSystem.IsPointerOverGameObject())
+        {
+            orbitalTransposer.m_XAxis.m_InputAxisValue = 0;
+            return;
+        }
 
         float mouseY = Input.GetAxisRaw("Mouse Y");
 
@@ -48,4 +56,5 @@ public class AirshipCameraController : MonoBehaviour
         followOffset.x = neutralZ;
         orbitalTransposer.m_FollowOffset=followOffset;
     }
+
 }
