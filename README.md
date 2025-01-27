@@ -6,7 +6,7 @@ The minimum viable product I wish to create is single displayed area which the u
 The user should also be able to fly around the area.
 The terrain will use a custom shader to provide colour to it at different heights.
 
-![19thOctober](https://media.github.falmouth.ac.uk/user/1458/files/2aa78b2e-729a-47ee-afe3-e5cf11b09c94)
+![19thOctober](https://github.com/Larabee0/Uni-Engine-Diorama/blob/main/19thOctober.png)
 ### Main Task Breakdown
 -	Create a height map terrain generator using an algorithm or number of algorithms from the internet.
 -	Create in game UI to change the generation settings
