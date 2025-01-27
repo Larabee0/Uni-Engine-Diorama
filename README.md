@@ -3,7 +3,7 @@ First year university project to prove you can use the unity game engine.
 This was way over what was asked because it was a multi-threaded terrain generator with textures and texture blending which you could modify during runtime.
 They were looking for basic understanding of building a scene and of programming some level of interaction.
 
-I was able to achieve a 86/100 on the module with this, with a first being 70/100
+I was able to achieve a 82/100 on the module with this, with a first being 70/100
 
 # gam102-1-2202796 In-Engine Diorama
 Challenge: Digital Fascinator
