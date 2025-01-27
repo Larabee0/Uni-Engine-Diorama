@@ -1,3 +1,7 @@
+First year university project to prove you can use the unity game engine.
+This was way overboard as it was a multi-threaded terrain generator with textures and texture blending which you could modify during runtime.
+I was able to achieve a 86/100 on the module with this, with a first being 70/100
+
 # gam102-1-2202796 In-Engine Diorama
 Challenge: Digital Fascinator
 # Proposal
